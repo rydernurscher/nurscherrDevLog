@@ -1,0 +1,162 @@
+[gd_scene format=3 uid="uid://dbyi8qtw5fore"]
+
+[ext_resource type="Script" uid="uid://bl1jxeuus2u7s" path="res://Player/playerUI/Scripts/player_ui.gd" id="1_lwipk"]
+[ext_resource type="Shader" uid="uid://byci6v4sx51n" path="res://Player/playerUI/Shaders/Health.gdshader" id="2_5m0x8"]
+[ext_resource type="Shader" uid="uid://bjewkakltrfbb" path="res://Player/playerUI/Shaders/mana.gdshader" id="3_654h1"]
+[ext_resource type="Shader" uid="uid://bet6qxkveiopy" path="res://Player/playerUI/Shaders/stam.gdshader" id="4_pc08v"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_654h1"]
+shader = ExtResource("2_5m0x8")
+shader_parameter/color_deep = Color(0.4, 0, 0, 1)
+shader_parameter/color_bright = Color(0.9, 0, 0, 1)
+shader_parameter/speed = 0.01
+shader_parameter/wave_stretch = Vector2(5, 1)
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_tybkg"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_654h1"]
+draw_center = false
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0, 0, 0, 1)
+border_blend = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pc08v"]
+shader = ExtResource("3_654h1")
+shader_parameter/color_deep = Color(0.01, 0.05, 0.2, 1)
+shader_parameter/color_bright = Color(0, 0.8, 1, 1)
+shader_parameter/speed = 0.01
+shader_parameter/wave_stretch = Vector2(5, 1)
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_654h1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a4em4"]
+bg_color = Color(0, 0, 0, 1)
+draw_center = false
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0, 0, 0, 1)
+border_blend = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tybkg"]
+shader = ExtResource("4_pc08v")
+shader_parameter/color_deep = Color(0, 0.43137255, 0, 1)
+shader_parameter/color_bright = Color(0, 0.8235294, 0, 1)
+shader_parameter/speed = 0.1
+shader_parameter/wave_stretch = Vector2(5, 1)
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_pc08v"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gxl1c"]
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0, 0, 1)
+border_blend = true
+
+[node name="PlayerUI" type="CanvasLayer" unique_id=1396024600]
+layer = 100
+script = ExtResource("1_lwipk")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1187674477]
+offset_right = 120.0
+offset_bottom = 40.0
+scale = Vector2(1.4, 1.4)
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 50
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1186242959]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HealthBar" type="TextureProgressBar" parent="MarginContainer/VBoxContainer" unique_id=820495864]
+material = SubResource("ShaderMaterial_654h1")
+custom_minimum_size = Vector2(450, 10)
+layout_mode = 2
+step = 0.05
+value = 100.0
+nine_patch_stretch = true
+texture_progress = SubResource("CanvasTexture_tybkg")
+
+[node name="ColorRect" type="ColorRect" parent="MarginContainer/VBoxContainer/HealthBar" unique_id=1577623477]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.14406255, 0.14406255, 0.14406255, 1)
+
+[node name="Panel" type="Panel" parent="MarginContainer/VBoxContainer/HealthBar" unique_id=2065911256]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_654h1")
+
+[node name="ManaBar" type="TextureProgressBar" parent="MarginContainer/VBoxContainer" unique_id=1896156222]
+material = SubResource("ShaderMaterial_pc08v")
+custom_minimum_size = Vector2(400, 10)
+layout_direction = 1
+layout_mode = 2
+step = 0.1
+value = 100.0
+nine_patch_stretch = true
+texture_progress = SubResource("CanvasTexture_654h1")
+
+[node name="ColorRect" type="ColorRect" parent="MarginContainer/VBoxContainer/ManaBar" unique_id=174587915]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.19434929, 0.19434926, 0.19434926, 1)
+
+[node name="Panel" type="Panel" parent="MarginContainer/VBoxContainer/ManaBar" unique_id=833664402]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_a4em4")
+
+[node name="StaminaBar" type="TextureProgressBar" parent="MarginContainer/VBoxContainer" unique_id=379429222]
+material = SubResource("ShaderMaterial_tybkg")
+custom_minimum_size = Vector2(400, 10)
+layout_direction = 1
+layout_mode = 2
+step = 0.1
+value = 100.0
+nine_patch_stretch = true
+texture_progress = SubResource("CanvasTexture_pc08v")
+
+[node name="Panel" type="Panel" parent="MarginContainer/VBoxContainer/StaminaBar" unique_id=1008824575]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gxl1c")
+
+[node name="ColorRect2" type="ColorRect" parent="MarginContainer/VBoxContainer/StaminaBar" unique_id=2039358157]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.14406255, 0.14406255, 0.14406255, 1)

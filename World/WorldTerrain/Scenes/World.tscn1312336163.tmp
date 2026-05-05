@@ -1,0 +1,187 @@
+[gd_scene format=3 uid="uid://drv5nrbnuw8ni"]
+
+[ext_resource type="Script" uid="uid://by4yy80x4ga2p" path="res://World/WorldTerrain/Scripts/world.gd" id="1_qncns"]
+[ext_resource type="PackedScene" uid="uid://btbwqdk3e7hf4" path="res://World/Structures/Scenes/Shrine.tscn" id="2_gyfyl"]
+[ext_resource type="TileSet" uid="uid://4dw2xyj4qacd" path="res://World/WorldTerrain/maintileset.tres" id="3_4vm2a"]
+[ext_resource type="Script" uid="uid://cu01qebuqlb0d" path="res://World/WorldTerrain/Scripts/foreground_layer.gd" id="4_yvxt5"]
+[ext_resource type="Texture2D" uid="uid://bf7kdx6ygpcqi" path="res://assets/Environment/background1.png" id="5_ubbky"]
+[ext_resource type="Texture2D" uid="uid://8eqssa8uswqr" path="res://assets/Environment/background2.png" id="6_nnetf"]
+[ext_resource type="Texture2D" uid="uid://dk8vkx0l6ems4" path="res://assets/Environment/background3.png" id="7_s8apy"]
+[ext_resource type="PackedScene" uid="uid://cfxueluo5j5ap" path="res://Player/Logic/PlayerFrameworks/Scenes/player.tscn" id="9_jvuqk"]
+[ext_resource type="Shader" uid="uid://jumqf27psai6" path="res://World/Effects/Shaders/PostProcessing.gdshader" id="10_qepeb"]
+
+[sub_resource type="Environment" id="Environment_js7pq"]
+background_mode = 3
+ambient_light_source = 2
+ambient_light_color = Color(0.6637184, 0.5182143, 0.16247293, 1)
+ambient_light_energy = 6.44
+reflected_light_source = 2
+tonemap_mode = 1
+ssao_enabled = true
+glow_enabled = true
+glow_normalized = true
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_eu7l1"]
+
+[sub_resource type="Compositor" id="Compositor_p1v5b"]
+
+[sub_resource type="Shader" id="Shader_qur2g"]
+code = "shader_type canvas_item;
+
+uniform vec4 rain_color : source_color = vec4(0.6, 0.75, 0.9, 0.7);
+uniform float rain_density : hint_range(0.0, 1.0) = 0.6; // Higher = thicker storm
+uniform float speed : hint_range(1.0, 20.0) = 12.0; 
+uniform float slant : hint_range(-1.0, 1.0) = 0.25; // The wind angle
+
+// Generates a random value based on a 1D input
+float hash(float x) { 
+    return fract(sin(x * 12.9898) * 43758.5453);
+}
+
+void fragment() {
+    vec2 uv = UV;
+    
+    // 1. Skew the entire coordinate system for wind slant
+    uv.x += uv.y * slant;
+    
+    float total_rain = 0.0;
+    
+    // 2. Generate 3 depth layers of rain for parallax
+    for (float i = 1.0; i <= 3.0; i++) {
+        
+        // Scale the UVs. Further layers get thinner (more X scale) and longer (less Y scale)
+        vec2 scale = vec2(100.0 * i, 1.5 * i);
+        vec2 scaled_uv = uv * scale;
+        
+        // Give every single vertical column a random Y offset so they don't line up
+        float column_id = floor(scaled_uv.x);
+        float column_offset = hash(column_id + i * 100.0);
+        
+        // THE FIX: Subtracting from UV.y makes the texture scroll DOWN the screen.
+        // We multiply by speed, layer depth, and add the column offset to stagger them.
+        scaled_uv.y -= TIME * speed * (0.8 + i * 0.2) + column_offset * 10.0;
+        
+        // Get the local position inside the current grid cell
+        vec2 cell_uv = fract(scaled_uv);
+        float cell_id = floor(scaled_uv.y);
+        
+        // Decide if a drop spawns in this specific cell
+        float drop_chance = hash(column_id + cell_id * 13.0);
+        float is_visible = step(drop_chance, rain_density / i); // Further layers have fewer visible drops
+        
+        // 3. Draw the streak
+        // Make the drop a razor-sharp thin line in the center of the column
+        float dist_x = abs(cell_uv.x - 0.5);
+        float line_x = smoothstep(0.1, 0.02, dist_x); 
+        
+        // Taper the streak so it has a fading tail at the top and a harder edge at the bottom
+        float line_y = smoothstep(0.0, 0.1, cell_uv.y) * smoothstep(1.0, 0.6, cell_uv.y);
+        
+        // Add this layer to the final output. Further layers fade into the background.
+        total_rain += line_x * line_y * is_visible * (1.0 - (i - 1.0) * 0.35);
+    }
+    
+    // Output the final clamped rain color
+    COLOR = vec4(rain_color.rgb, clamp(total_rain, 0.0, 1.0) * rain_color.a);
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fv4w7"]
+shader = SubResource("Shader_qur2g")
+shader_parameter/rain_color = Color(0.8, 0.9, 1, 1)
+shader_parameter/rain_density = 0.0
+shader_parameter/speed = 3.3510001116725
+shader_parameter/slant = 0.25
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_f5c0m"]
+shader = ExtResource("10_qepeb")
+shader_parameter/fog_color = Color(0.12, 0.15, 0.18, 1)
+shader_parameter/fog_density = 0.8070000383325
+shader_parameter/fog_speed = 0.05
+shader_parameter/desaturation = 0.45
+shader_parameter/tint_color = Color(0.6, 0.7019608, 0.7490196, 1)
+shader_parameter/vignette_intensity = 0.27200001292
+shader_parameter/grain_strength = 0.01600000076
+
+[node name="WorldGenerator" type="Node2D" unique_id=288371783 node_paths=PackedStringArray("player_node")]
+script = ExtResource("1_qncns")
+player_node = NodePath("Player/Player")
+surface_amplitude = 4
+surface_frequency = 0.004
+small_surface_structures = Array[PackedScene]([ExtResource("2_gyfyl")])
+
+[node name="ForegroundLayer" type="TileMapLayer" parent="." unique_id=1110115016 groups=["terrain"]]
+z_index = 4
+z_as_relative = false
+tile_set = ExtResource("3_4vm2a")
+collision_visibility_mode = 2
+script = ExtResource("4_yvxt5")
+
+[node name="ParallaxBackground" type="ParallaxBackground" parent="." unique_id=1221704183]
+offset = Vector2(-400, -400)
+scale = Vector2(2, 2)
+transform = Transform2D(2, 0, 0, 2, -400, -400)
+
+[node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground" unique_id=997833902]
+motion_scale = Vector2(0.001, 0)
+motion_mirroring = Vector2(1000, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer" unique_id=464327808]
+position = Vector2(630.5, 464.5)
+scale = Vector2(1.6421875, 1.7265625)
+texture = ExtResource("5_ubbky")
+
+[node name="ParallaxLayer2" type="ParallaxLayer" parent="ParallaxBackground" unique_id=834525781]
+motion_scale = Vector2(0.01, 0)
+motion_mirroring = Vector2(1500, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer2" unique_id=463151101]
+texture_filter = 2
+texture_repeat = 3
+position = Vector2(849.75, 259)
+scale = Vector2(2.3992188, 1)
+texture = ExtResource("6_nnetf")
+
+[node name="ParallaxLayer3" type="ParallaxLayer" parent="ParallaxBackground" unique_id=1300154281]
+motion_scale = Vector2(0.025, 0)
+motion_mirroring = Vector2(1560, 150)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer3" unique_id=2025911431]
+position = Vector2(834.75, 304)
+scale = Vector2(2.4617188, 1)
+texture = ExtResource("7_s8apy")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1113306821]
+environment = SubResource("Environment_js7pq")
+camera_attributes = SubResource("CameraAttributesPractical_eu7l1")
+compositor = SubResource("Compositor_p1v5b")
+
+[node name="Rain" type="CanvasLayer" parent="." unique_id=2002499599]
+layer = -1
+
+[node name="Rain" type="ColorRect" parent="Rain" unique_id=431930891]
+z_index = -5
+z_as_relative = false
+material = SubResource("ShaderMaterial_fv4w7")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Player" parent="." unique_id=619370920 instance=ExtResource("9_jvuqk")]
+
+[node name="PostProcessingLayer" type="CanvasLayer" parent="." unique_id=1300823274]
+layer = 2
+visible = false
+
+[node name="ColorRect" type="ColorRect" parent="PostProcessingLayer" unique_id=168611181]
+z_index = -40
+material = SubResource("ShaderMaterial_f5c0m")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[editable path="Player"]
