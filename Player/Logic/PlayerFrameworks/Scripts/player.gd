@@ -198,7 +198,7 @@ func take_damage(amount: float):
 	# Flash sprite red
 	var tw = create_tween()
 	sprite.modulate = Color(5, 0.5, 0.5)
-	tw.tween_property(sprite, "modulate", Color.WHITE, 0.2)
+	tw.tween_property(sprite, "modulate", Color.WHITE, 1.0)
 	
 	if current_health <= 0: die()
 

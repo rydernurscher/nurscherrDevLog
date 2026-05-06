@@ -1,73 +1,107 @@
 shader_type canvas_item;
 
+// --- UNIFORMS ---
 uniform sampler2D screen_texture : hint_screen_texture, filter_linear_mipmap;
 
-group_uniforms Cinematic_Lens;
-uniform float contrast : hint_range(0.0, 2.0) = 1.25;
-uniform float brightness : hint_range(-1.0, 1.0) = -0.05;
-uniform float saturation : hint_range(0.0, 2.0) = 0.85;
-uniform float chromatic_aberration : hint_range(0.0, 0.01) = 0.002;
-uniform float vignette_intensity : hint_range(0.0, 3.0) = 0.4;
-uniform float vignette_opacity : hint_range(0.0, 1.0) = 0.8;
+group_uniforms Technical_Settings;
+uniform float exposure : hint_range(0.0, 5.0) = 1.0;
+uniform float sharpness : hint_range(0.0, 1.0) = 0.2; // CAS-style sharpening
 
-group_uniforms Elden_Color_Grading;
-// Elden Shadows: Deep Teal/Blue (The Night)
-uniform vec3 shadow_tint : source_color = vec3(0.05, 0.08, 0.12);
-// Elden Highlights: Tarnished Gold (The Erdtree)
-uniform vec3 highlight_tint : source_color = vec3(1.0, 0.85, 0.6);
-uniform float split_toning_intensity : hint_range(0.0, 1.0) = 0.3;
+group_uniforms Color_Grading;
+uniform float contrast : hint_range(0.5, 1.5) = 1.1;
+uniform float saturation : hint_range(0.0, 2.0) = 0.9;
+uniform vec3 shadow_tint : source_color = vec3(0.05, 0.08, 0.15);
+uniform vec3 midtone_tint : source_color = vec3(0.3, 0.25, 0.2);
+uniform vec3 highlight_tint : source_color = vec3(1.0, 0.9, 0.7);
+
+group_uniforms Lens_Effects;
+uniform float ca_strength : hint_range(0.0, 0.05) = 0.003;
+uniform float vignette_intensity : hint_range(0.0, 2.0) = 0.7;
+uniform float vignette_softness : hint_range(0.0, 1.0) = 0.5;
 
 group_uniforms Atmosphere;
-uniform float grain_amount : hint_range(0.0, 0.1) = 0.03;
-uniform float mist_density : hint_range(0.0, 1.0) = 0.2;
+uniform float film_grain : hint_range(0.0, 0.1) = 0.04;
+uniform float scanline_opacity : hint_range(0.0, 0.1) = 0.02; // AAA games often have subtle texture
 
-float hash(vec2 p) {
-	return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+// --- HELPER FUNCTIONS ---
+
+// ACES Filmic Tonemapping (The "Secret Sauce" for the Elden Ring look)
+vec3 tonemap_aces(vec3 x) {
+    float a = 2.51;
+    float b = 0.03;
+    float c = 2.43;
+    float d = 0.59;
+    float e = 0.14;
+    return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
+}
+
+// Better noise function (Blue-ish noise distribution)
+float interleaved_gradient_noise(vec2 uv) {
+    vec3 magic = vec3(0.06711056, 0.00583715, 52.9829189);
+    return fract(magic.z * fract(dot(uv, magic.xy)));
+}
+
+// Convert sRGB to Linear for math
+vec3 srgb_to_linear(vec3 color) {
+    return pow(color, vec3(2.2));
+}
+
+// Convert Linear to sRGB for display
+vec3 linear_to_srgb(vec3 color) {
+    return pow(color, vec3(1.0 / 2.2));
 }
 
 void fragment() {
-	vec2 uv = SCREEN_UV;
-	vec2 center_dist = uv - 0.5;
-	
-	// 1. CHROMATIC ABERRATION
-	// Shifts the Red and Blue channels towards the edges for a "lens" look
-	float ca_offset = length(center_dist) * chromatic_aberration;
-	float r = texture(screen_texture, uv - vec2(ca_offset, 0.0)).r;
-	float g = texture(screen_texture, uv).g;
-	float b = texture(screen_texture, uv + vec2(ca_offset, 0.0)).b;
-	vec3 color = vec3(r, g, b);
-	
-	// 2. BRIGHTNESS & CONTRAST
-	color = (color - 0.5) * contrast + 0.5 + brightness;
-	
-	// 3. SATURATION (Desaturate for that "grim" feel)
-	float luma = dot(color, vec3(0.299, 0.587, 0.114));
-	color = mix(vec3(luma), color, saturation);
-	
-	// 4. ELDEN SPLIT TONING
-	// Tint shadows cool and highlights warm gold
-	vec3 shadows = mix(color, color * shadow_tint * 2.0, split_toning_intensity);
-	vec3 highlights = mix(color, color * highlight_tint, split_toning_intensity);
-	color = mix(shadows, highlights, smoothstep(0.2, 0.8, luma));
-	
-	// 5. DISTANCE HAZING (Vertical Mist)
-	// Darkens the bottom of the screen and adds a bit of "ground dust" vibe
-	float ground_mist = smoothstep(1.0, 0.2, uv.y) * mist_density;
-	color = mix(color, shadow_tint, ground_mist * 0.5);
+    vec2 uv = SCREEN_UV;
+    vec2 dist_from_center = uv - 0.5;
+    
+    // 1. RADIAL CHROMATIC ABERRATION
+    // AAA method: Distort R and B channels based on distance from center (lens curvature)
+    float ca_offset = length(dist_from_center) * ca_strength;
+    float r = texture(screen_texture, uv - (dist_from_center * ca_offset)).r;
+    float g = texture(screen_texture, uv).g;
+    float b = texture(screen_texture, uv + (dist_from_center * ca_offset)).b;
+    vec3 color = vec3(r, g, b);
+    
+    // 2. LINEAR SPACE CONVERSION
+    // AAA math must be done in linear space, not sRGB
+    color = srgb_to_linear(color);
+    color *= exposure;
 
-	// 6. VIGNETTE
-	// Makes the center feel like a point of focus (the player) and edges dark
-	float vignette = 1.0 - dot(center_dist, center_dist) * (vignette_intensity * 2.0);
-	color *= mix(1.0, clamp(vignette, 0.0, 1.0), vignette_opacity);
-	
-	// 7. CINEMATIC FILM GRAIN
-	// Elden Ring has a subtle "dirty" look to the air. 
-	// This grain is subtle and moves over time.
-	float noise = hash(uv + mod(TIME, 10.0));
-	color += (noise - 0.5) * grain_amount;
-	
-	// 8. FINAL CURVE (Slightly boost the blacks for that "crushed" look)
-	color = pow(color, vec3(1.1));
+    // 3. SHARPENING (Subtle Contrast Adaptive Sharpening)
+    // Helps pixel art pop against the blur of post-processing
+    vec3 neighbors = srgb_to_linear(texture(screen_texture, uv + vec2(SCREEN_PIXEL_SIZE.x, 0)).rgb);
+    color += (color - neighbors) * sharpness;
 
-	COLOR = vec4(color, 1.0);
+    // 4. COLOR GRADING (Advanced 3-Way Power/Slope/Offset)
+    float luma = dot(color, vec3(0.2126, 0.7152, 0.0722));
+    
+    // Apply contrast around a pivot
+    color = pow(color, vec3(contrast));
+    
+    // Advanced Split Toning
+    vec3 graded_color = mix(shadow_tint, midtone_tint, smoothstep(0.0, 0.5, luma));
+    graded_color = mix(graded_color, highlight_tint, smoothstep(0.5, 1.0, luma));
+    color *= graded_color;
+    
+    // Saturation
+    color = mix(vec3(luma), color, saturation);
+
+    // 5. TONEMAPPING
+    // This compresses bright "Erdtree" golds so they glow without "clipping" to white
+    color = tonemap_aces(color);
+
+    // 6. VIGNETTE (Physical falloff)
+    float vignette = smoothstep(0.8, vignette_softness * 0.4, length(dist_from_center * vignette_intensity));
+    color *= vignette;
+
+    // 7. FILM GRAIN & DITHERING
+    // AAA grain is stronger in the midtones and subtle in blacks/whites
+    float noise = interleaved_gradient_noise(uv * vec2(TIME * 0.01));
+    float grain_mask = pow(1.0 - luma, 2.0) * luma * 4.0; // Mask grain to midtones
+    color += (noise - 0.5) * film_grain * grain_mask;
+    
+    // 8. FINAL OUTPUT
+    // Convert back to sRGB for the monitor
+    COLOR = vec4(linear_to_srgb(color), 1.0);
 }

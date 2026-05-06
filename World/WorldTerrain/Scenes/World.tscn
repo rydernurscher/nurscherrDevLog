@@ -7,7 +7,6 @@
 [ext_resource type="Texture2D" uid="uid://8eqssa8uswqr" path="res://assets/Environment/background2.png" id="6_nnetf"]
 [ext_resource type="Texture2D" uid="uid://dk8vkx0l6ems4" path="res://assets/Environment/background3.png" id="7_s8apy"]
 [ext_resource type="PackedScene" uid="uid://cfxueluo5j5ap" path="res://Player/Logic/PlayerFrameworks/Scenes/player.tscn" id="9_jvuqk"]
-[ext_resource type="Shader" uid="uid://jumqf27psai6" path="res://World/Effects/Shaders/PostProcessing.gdshader" id="10_qepeb"]
 
 [sub_resource type="Environment" id="Environment_js7pq"]
 background_mode = 3
@@ -27,87 +26,6 @@ glow_blend_mode = 2
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_eu7l1"]
 
 [sub_resource type="Compositor" id="Compositor_p1v5b"]
-
-[sub_resource type="Shader" id="Shader_qur2g"]
-code = "shader_type canvas_item;
-
-uniform vec4 rain_color : source_color = vec4(0.6, 0.75, 0.9, 0.7);
-uniform float rain_density : hint_range(0.0, 1.0) = 0.6; // Higher = thicker storm
-uniform float speed : hint_range(1.0, 20.0) = 12.0; 
-uniform float slant : hint_range(-1.0, 1.0) = 0.25; // The wind angle
-
-// Generates a random value based on a 1D input
-float hash(float x) { 
-    return fract(sin(x * 12.9898) * 43758.5453);
-}
-
-void fragment() {
-    vec2 uv = UV;
-    
-    // 1. Skew the entire coordinate system for wind slant
-    uv.x += uv.y * slant;
-    
-    float total_rain = 0.0;
-    
-    // 2. Generate 3 depth layers of rain for parallax
-    for (float i = 1.0; i <= 3.0; i++) {
-        
-        // Scale the UVs. Further layers get thinner (more X scale) and longer (less Y scale)
-        vec2 scale = vec2(100.0 * i, 1.5 * i);
-        vec2 scaled_uv = uv * scale;
-        
-        // Give every single vertical column a random Y offset so they don't line up
-        float column_id = floor(scaled_uv.x);
-        float column_offset = hash(column_id + i * 100.0);
-        
-        // THE FIX: Subtracting from UV.y makes the texture scroll DOWN the screen.
-        // We multiply by speed, layer depth, and add the column offset to stagger them.
-        scaled_uv.y -= TIME * speed * (0.8 + i * 0.2) + column_offset * 10.0;
-        
-        // Get the local position inside the current grid cell
-        vec2 cell_uv = fract(scaled_uv);
-        float cell_id = floor(scaled_uv.y);
-        
-        // Decide if a drop spawns in this specific cell
-        float drop_chance = hash(column_id + cell_id * 13.0);
-        float is_visible = step(drop_chance, rain_density / i); // Further layers have fewer visible drops
-        
-        // 3. Draw the streak
-        // Make the drop a razor-sharp thin line in the center of the column
-        float dist_x = abs(cell_uv.x - 0.5);
-        float line_x = smoothstep(0.1, 0.02, dist_x); 
-        
-        // Taper the streak so it has a fading tail at the top and a harder edge at the bottom
-        float line_y = smoothstep(0.0, 0.1, cell_uv.y) * smoothstep(1.0, 0.6, cell_uv.y);
-        
-        // Add this layer to the final output. Further layers fade into the background.
-        total_rain += line_x * line_y * is_visible * (1.0 - (i - 1.0) * 0.35);
-    }
-    
-    // Output the final clamped rain color
-    COLOR = vec4(rain_color.rgb, clamp(total_rain, 0.0, 1.0) * rain_color.a);
-}"
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_fv4w7"]
-shader = SubResource("Shader_qur2g")
-shader_parameter/rain_color = Color(0.8, 0.9, 1, 1)
-shader_parameter/rain_density = 0.0
-shader_parameter/speed = 3.3510001116725
-shader_parameter/slant = 0.25
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_f5c0m"]
-shader = ExtResource("10_qepeb")
-shader_parameter/contrast = 1.25
-shader_parameter/brightness = -0.05
-shader_parameter/saturation = 0.85
-shader_parameter/chromatic_aberration = 0.002
-shader_parameter/vignette_intensity = 0.27200001292
-shader_parameter/vignette_opacity = 0.8
-shader_parameter/shadow_tint = Color(0.05, 0.08, 0.12, 1)
-shader_parameter/highlight_tint = Color(1, 0.85, 0.6, 1)
-shader_parameter/split_toning_intensity = 0.3
-shader_parameter/grain_amount = 0.03
-shader_parameter/mist_density = 0.2
 
 [node name="WorldGenerator" type="Node2D" unique_id=288371783 node_paths=PackedStringArray("player_node")]
 script = ExtResource("1_qncns")
@@ -165,32 +83,6 @@ environment = SubResource("Environment_js7pq")
 camera_attributes = SubResource("CameraAttributesPractical_eu7l1")
 compositor = SubResource("Compositor_p1v5b")
 
-[node name="Rain" type="CanvasLayer" parent="." unique_id=2002499599]
-layer = -1
-
-[node name="Rain" type="ColorRect" parent="Rain" unique_id=431930891]
-z_index = -5
-z_as_relative = false
-material = SubResource("ShaderMaterial_fv4w7")
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
 [node name="Player" parent="." unique_id=619370920 instance=ExtResource("9_jvuqk")]
-
-[node name="PostProcessingLayer" type="CanvasLayer" parent="." unique_id=1300823274]
-layer = 2
-
-[node name="ColorRect" type="ColorRect" parent="PostProcessingLayer" unique_id=168611181]
-z_index = -40
-material = SubResource("ShaderMaterial_f5c0m")
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
 
 [editable path="Player"]

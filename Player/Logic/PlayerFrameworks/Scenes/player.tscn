@@ -1,12 +1,27 @@
 [gd_scene format=3 uid="uid://cfxueluo5j5ap"]
 
 [ext_resource type="Script" uid="uid://bn3lg0wnyssq" path="res://Player/Logic/PlayerFrameworks/Scripts/player.gd" id="1_4flbx"]
+[ext_resource type="Shader" uid="uid://g0qiswhw5p0r" path="res://resources/postProcessing/Universal.gdshader" id="1_eikxu"]
 [ext_resource type="Texture2D" uid="uid://ba8wkt1jll1px" path="res://assets/Environment/templateforchar.png" id="2_sweqy"]
 [ext_resource type="Texture2D" uid="uid://bj7mcc58qqram" path="res://assets/Items/Equipment/Raven_Wing-Sheet.png" id="5_sweqy"]
 [ext_resource type="PackedScene" uid="uid://dbyi8qtw5fore" path="res://Player/playerUI/Scenes/player_ui.tscn" id="7_1jxqw"]
-[ext_resource type="PackedScene" uid="uid://c6owj7pfex0sk" path="res://World/Effects/Scenes/screen_flash.tscn" id="7_eikxu"]
 [ext_resource type="PackedScene" uid="uid://c47h02if75tc1" path="res://Player/Logic/Hitbox&Hurtbox/Scenes/hurtbox.tscn" id="17_op7ga"]
 [ext_resource type="PackedScene" uid="uid://d3ckod8xqvbwq" path="res://Player/Logic/Hitbox&Hurtbox/Scenes/hitbox.tscn" id="18_q13i1"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_w1ybu"]
+shader = ExtResource("1_eikxu")
+shader_parameter/normal_strength = 1.0
+shader_parameter/specular_color = Color(1, 0.9, 0.7, 1)
+shader_parameter/glossiness = 0.5
+shader_parameter/emissive_tint = Color(1, 0.8, 0.4, 1)
+shader_parameter/emissive_intensity = 2.0
+shader_parameter/pulse_speed = 0.0
+shader_parameter/enable_rim = true
+shader_parameter/rim_color = Color(1, 1, 1, 0.5)
+shader_parameter/rim_width = 1.5
+shader_parameter/world_depth = 0.0
+shader_parameter/fog_color = Color(0.05, 0.07, 0.1, 1)
+shader_parameter/fog_max_density = 0.8
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_eikxu"]
 
@@ -157,6 +172,7 @@ animations = [{
 
 [node name="Player" type="CharacterBody2D" parent="." unique_id=1225257479]
 z_index = 100
+material = SubResource("ShaderMaterial_w1ybu")
 position = Vector2(577, 325)
 collision_layer = 9
 script = ExtResource("1_4flbx")
@@ -205,5 +221,3 @@ position = Vector2(3, 8)
 scale = Vector2(1.941, 1.853)
 sprite_frames = SubResource("SpriteFrames_606se")
 animation = &"hurt"
-
-[node name="ScreenFlash" parent="Player" unique_id=1366389253 instance=ExtResource("7_eikxu")]
