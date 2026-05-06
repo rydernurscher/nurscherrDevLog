@@ -1,8 +1,7 @@
 [gd_scene format=3 uid="uid://drv5nrbnuw8ni"]
 
 [ext_resource type="Script" uid="uid://by4yy80x4ga2p" path="res://World/WorldTerrain/Scripts/world.gd" id="1_qncns"]
-[ext_resource type="PackedScene" uid="uid://btbwqdk3e7hf4" path="res://World/Structures/Scenes/Shrine.tscn" id="2_gyfyl"]
-[ext_resource type="TileSet" uid="uid://4dw2xyj4qacd" path="res://World/WorldTerrain/maintileset.tres" id="3_4vm2a"]
+[ext_resource type="TileSet" uid="uid://wn4mtjavttbh" path="res://assets/Environment/Tilesets/GrassBlock/MainTerrain.tres" id="3_qur2g"]
 [ext_resource type="Script" uid="uid://cu01qebuqlb0d" path="res://World/WorldTerrain/Scripts/foreground_layer.gd" id="4_yvxt5"]
 [ext_resource type="Texture2D" uid="uid://bf7kdx6ygpcqi" path="res://assets/Environment/background1.png" id="5_ubbky"]
 [ext_resource type="Texture2D" uid="uid://8eqssa8uswqr" path="res://assets/Environment/background2.png" id="6_nnetf"]
@@ -19,7 +18,11 @@ reflected_light_source = 2
 tonemap_mode = 1
 ssao_enabled = true
 glow_enabled = true
+glow_levels/4 = 9.24
+glow_levels/5 = 8.37
 glow_normalized = true
+glow_intensity = 0.5
+glow_blend_mode = 2
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_eu7l1"]
 
@@ -94,26 +97,33 @@ shader_parameter/slant = 0.25
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_f5c0m"]
 shader = ExtResource("10_qepeb")
-shader_parameter/fog_color = Color(0.12, 0.15, 0.18, 1)
-shader_parameter/fog_density = 0.8070000383325
-shader_parameter/fog_speed = 0.05
-shader_parameter/desaturation = 0.45
-shader_parameter/tint_color = Color(0.6, 0.7019608, 0.7490196, 1)
+shader_parameter/contrast = 1.25
+shader_parameter/brightness = -0.05
+shader_parameter/saturation = 0.85
+shader_parameter/chromatic_aberration = 0.002
 shader_parameter/vignette_intensity = 0.27200001292
-shader_parameter/grain_strength = 0.01600000076
+shader_parameter/vignette_opacity = 0.8
+shader_parameter/shadow_tint = Color(0.05, 0.08, 0.12, 1)
+shader_parameter/highlight_tint = Color(1, 0.85, 0.6, 1)
+shader_parameter/split_toning_intensity = 0.3
+shader_parameter/grain_amount = 0.03
+shader_parameter/mist_density = 0.2
 
 [node name="WorldGenerator" type="Node2D" unique_id=288371783 node_paths=PackedStringArray("player_node")]
 script = ExtResource("1_qncns")
 player_node = NodePath("Player/Player")
-surface_amplitude = 4
-surface_frequency = 0.004
-small_surface_structures = Array[PackedScene]([ExtResource("2_gyfyl")])
 
 [node name="ForegroundLayer" type="TileMapLayer" parent="." unique_id=1110115016 groups=["terrain"]]
 z_index = 4
 z_as_relative = false
-tile_set = ExtResource("3_4vm2a")
+tile_set = ExtResource("3_qur2g")
 collision_visibility_mode = 2
+script = ExtResource("4_yvxt5")
+
+[node name="BackgroundLayer" type="TileMapLayer" parent="." unique_id=1989235220]
+z_index = 3
+tile_set = ExtResource("3_qur2g")
+collision_enabled = false
 script = ExtResource("4_yvxt5")
 
 [node name="ParallaxBackground" type="ParallaxBackground" parent="." unique_id=1221704183]
@@ -172,7 +182,6 @@ grow_vertical = 2
 
 [node name="PostProcessingLayer" type="CanvasLayer" parent="." unique_id=1300823274]
 layer = 2
-visible = false
 
 [node name="ColorRect" type="ColorRect" parent="PostProcessingLayer" unique_id=168611181]
 z_index = -40

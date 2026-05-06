@@ -11,8 +11,10 @@ func set_max_stats(max_hp, max_fp, max_sp):
 	mana_bar.max_value = max_fp
 	stamina_bar.max_value = max_sp
 
-func update_health(new_value):
-	health_bar.value = new_value
+func update_health(val):
+	health_bar.value = val
+	var ratio = val / health_bar.max_value
+	health_bar.material.set_shader_parameter("health_ratio", ratio)
 
 func update_mana(new_value):
 	mana_bar.value = new_value

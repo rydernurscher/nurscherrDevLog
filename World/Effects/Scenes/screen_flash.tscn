@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://c6owj7pfex0sk"]
+
+[ext_resource type="Shader" uid="uid://c0occq0jx8mpn" path="res://World/Effects/Shaders/ScreenFlash.gdshader" id="1_nqgxw"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_va2ar"]
+shader = ExtResource("1_nqgxw")
+shader_parameter/flash_strength = 0.0
+
+[node name="ScreenFlash" type="ColorRect" unique_id=1366389253]
+material = SubResource("ShaderMaterial_va2ar")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

@@ -1,0 +1,154 @@
+[gd_resource type="TileSet" format=3 uid="uid://wn4mtjavttbh"]
+
+[ext_resource type="Texture2D" uid="uid://de21ghuxbffhg" path="res://assets/Environment/Tilesets/GrassBlock/GroundTileset.png" id="1_sjlqp"]
+[ext_resource type="Texture2D" uid="uid://dfij1ydh00jll" path="res://assets/Environment/Tilesets/Walls/DirtWall/DirtWallTileset.png" id="2_j5lwo"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_j5lwo"]
+texture = ExtResource("1_sjlqp")
+2:3/0 = 0
+2:3/0/terrain_set = 0
+2:3/0/terrain = 0
+2:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:3/0/terrains_peering_bit/right_side = 0
+2:3/0/metadata/_better_terrain = {
+&"type": 0
+}
+3:3/0 = 0
+3:3/0/terrain_set = 0
+3:3/0/terrain = 0
+3:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+3:3/0/terrains_peering_bit/right_side = 0
+3:3/0/terrains_peering_bit/bottom_side = 0
+3:3/0/terrains_peering_bit/left_side = 0
+3:3/0/metadata/_better_terrain = {
+0: [0],
+8: [0],
+&"type": 1
+}
+4:3/0 = 0
+4:3/0/terrain_set = 0
+4:3/0/terrain = 0
+4:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+4:3/0/terrains_peering_bit/bottom_side = 0
+4:3/0/terrains_peering_bit/left_side = 0
+4:3/0/metadata/_better_terrain = {
+7: [0],
+8: [0],
+&"type": 2
+}
+2:4/0 = 0
+2:4/0/terrain_set = 0
+2:4/0/terrain = 0
+2:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:4/0/terrains_peering_bit/right_side = 0
+2:4/0/terrains_peering_bit/bottom_side = 0
+2:4/0/terrains_peering_bit/top_side = 0
+2:4/0/metadata/_better_terrain = {
+&"type": 3
+}
+3:4/0 = 0
+3:4/0/terrain_set = 0
+3:4/0/terrain = 0
+3:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+3:4/0/terrains_peering_bit/right_side = 0
+3:4/0/terrains_peering_bit/bottom_side = 0
+3:4/0/terrains_peering_bit/left_side = 0
+3:4/0/terrains_peering_bit/top_side = 0
+3:4/0/metadata/_better_terrain = {
+0: [0],
+3: [0],
+4: [0],
+7: [0],
+8: [0],
+11: [0],
+12: [0],
+15: [0],
+&"type": 4
+}
+4:4/0 = 0
+4:4/0/terrain_set = 0
+4:4/0/terrain = 0
+4:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+4:4/0/terrains_peering_bit/bottom_side = 0
+4:4/0/terrains_peering_bit/left_side = 0
+4:4/0/terrains_peering_bit/top_side = 0
+4:4/0/metadata/_better_terrain = {
+7: [0],
+8: [0],
+11: [0],
+&"type": 5
+}
+2:5/0 = 0
+2:5/0/terrain_set = 0
+2:5/0/terrain = 0
+2:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:5/0/terrains_peering_bit/right_side = 0
+2:5/0/terrains_peering_bit/top_side = 0
+2:5/0/metadata/_better_terrain = {
+&"type": 6
+}
+3:5/0 = 0
+3:5/0/terrain_set = 0
+3:5/0/terrain = 0
+3:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+3:5/0/terrains_peering_bit/right_side = 0
+3:5/0/terrains_peering_bit/left_side = 0
+3:5/0/terrains_peering_bit/top_side = 0
+3:5/0/metadata/_better_terrain = {
+&"type": 7
+}
+4:5/0 = 0
+4:5/0/terrain_set = 0
+4:5/0/terrain = 0
+4:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+4:5/0/terrains_peering_bit/left_side = 0
+4:5/0/terrains_peering_bit/top_side = 0
+4:5/0/metadata/_better_terrain = {
+11: [0],
+&"type": 8
+}
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_yn15i"]
+texture = ExtResource("2_j5lwo")
+2:1/0 = 0
+3:1/0 = 0
+4:1/0 = 0
+2:2/0 = 0
+3:2/0 = 0
+4:2/0 = 0
+2:3/0 = 0
+3:3/0 = 0
+4:3/0 = 0
+
+[resource]
+physics_layer_0/collision_layer = 1
+terrain_set_0/mode = 2
+terrain_set_0/terrain_0/name = "Terrain 0"
+terrain_set_0/terrain_0/color = Color(0.5, 0.34375, 0.25, 1)
+sources/0 = SubResource("TileSetAtlasSource_j5lwo")
+sources/1 = SubResource("TileSetAtlasSource_yn15i")
+metadata/_better_terrain = {
+&"decoration": ["Decoration", Color(0.4117647, 0.4117647, 0.4117647, 1), 3, [], {
+&"path": "res://addons/better-terrain/icons/Decoration.svg"
+}],
+&"terrains": [["New terrain", Color(0.57446915, 0.19028018, 0.7605184, 1), 0, [], {
+&"path": ""
+}], ["New terrain", Color(0.91809964, 0.56355995, 0.63548416, 1), 0, [], {
+&"path": ""
+}], ["New terrain", Color(0.12089508, 0.67965704, 0.3036283, 1), 0, [], {
+&"path": ""
+}], ["New terrain", Color(0.6281145, 0.12421037, 0.7726159, 1), 0, [], {
+&"path": ""
+}], ["New terrain", Color(0.62576854, 0.46438825, 0.81509495, 1), 0, [], {
+&"path": ""
+}], ["New terrain", Color(0.22198497, 0.6667239, 0.6429253, 1), 0, [], {
+&"path": ""
+}], ["New terrain", Color(0.008861865, 0.92238516, 0.34555292, 1), 0, [], {
+&"path": ""
+}], ["New terrain", Color(0.3920129, 0.41289985, 0.64870894, 1), 0, [], {
+&"path": ""
+}], ["New terrain", Color(0.5593629, 0.81683505, 0.67717236, 1), 0, [], {
+&"path": ""
+}]],
+&"version": "0.2"
+}

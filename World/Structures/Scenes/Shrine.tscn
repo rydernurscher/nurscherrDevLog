@@ -1,4 +1,4 @@
-[gd_scene format=4 uid="uid://btbwqdk3e7hf4"]
+[gd_scene format=3 uid="uid://btbwqdk3e7hf4"]
 
 [ext_resource type="Texture2D" uid="uid://bfs3u2mv2j5am" path="res://assets/Environment/Trees/Tree1/Tree1_Base.png" id="1_2qu7d"]
 
@@ -81,7 +81,6 @@ pattern_0 = SubResource("TileMapPattern_wly6o")
 
 [node name="Util_" type="TileMapLayer" parent="." unique_id=415198208]
 position = Vector2(6, 0)
-tile_map_data = PackedByteArray("AADi/x8AAAAAAAAAAADi/yAAAAAAAAEAAADi/yEAAAAAAAIAAADj/x8AAAABAAAAAADj/yAAAAABAAEAAADj/yEAAAABAAIAAADk/x8AAAACAAAAAADk/yAAAAACAAEAAADk/yEAAAACAAIAAAAPABMAAAAAAAYAAAAPABQAAAADAAUAAAAPABUAAAADAAYAAAAQABMAAAABAAYAAAAQABQAAAAEAAUAAAAQABUAAAAEAAYAAAARABMAAAACAAYAAAARABQAAAAFAAUAAAARABUAAAAFAAYAAAAPABAAAAAAAAMAAAAPABEAAAAAAAQAAAAPABIAAAAAAAUAAAAQABAAAAABAAMAAAAQABEAAAABAAQAAAAQABIAAAABAAUAAAARABAAAAACAAMAAAARABEAAAACAAQAAAARABIAAAACAAUAAAA=")
 tile_set = SubResource("TileSet_83kso")
 
 [node name="Sprite2D2" type="Sprite2D" parent="." unique_id=692595610]

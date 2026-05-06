@@ -1,142 +1,160 @@
-# world_generator.gd
+# res://World/WorldTerrain/Scripts/world.gd
 extends Node2D
 class_name WorldGenerator
 
+@export_group("World Size")
 @export var map_width: int = 1200
 @export var map_height: int = 500
-@export var chunk_width: int = 100 # Determines how wide each chunk section is
-@export var surface_level: int = 50
-@export var player_node: CharacterBody2D 
+@export var chunk_width: int = 32
+
+@export_group("Generation Stats")
+@export var surface_level: int = 60
 @export var surface_amplitude: int = 15 
-@export var surface_frequency: float = 0.03 
+@export var surface_frequency: float = 0.015 
 
-# Surface Structures
-@export var small_surface_structures: Array[PackedScene] 
-@export var structure_spawn_chance: float = 0.03 
-@export var min_structure_distance: int = 30 
-
+@export_group("References")
+@export var player_node: CharacterBody2D 
 @onready var base_layer: TileMapLayer = $ForegroundLayer
+@onready var wall_base_layer: TileMapLayer = get_node_or_null("BackgroundLayer")
+
+# Master data dictionary
+var world_data: Dictionary = {}
+var wall_data: Dictionary = {}
+var chunks: Dictionary = {} 
+var wall_chunks: Dictionary = {}
 
 var surface_noise: FastNoiseLite
 var cave_noise: FastNoiseLite
-var stone_noise: FastNoiseLite 
 
-# Dictionary to hold our chunk instances
-var chunks: Dictionary = {} 
+# Mapping for 0-15 bitmask
+const MASK_MAP = {
+	15: Vector2i(3, 4), 14: Vector2i(3, 3), 13: Vector2i(3, 5),
+	11: Vector2i(2, 4), 7:  Vector2i(4, 4), 10: Vector2i(2, 3),
+	6:  Vector2i(4, 3), 9:  Vector2i(2, 5), 5:  Vector2i(4, 5), 0: Vector2i(3, 3)
+}
 
-const TILE_DIRT_SOURCE_ID = 0
-const TILE_STONE_SOURCE_ID = 1
-const TILE_GRASS_SOURCE_ID = 0
-const DIRT_ATLAS = Vector2i(5, 0)
-const STONE_ATLAS = Vector2i(1, 1) 
-const GRASS_ATLAS = Vector2i(1, 0)
+const WALL_MASK_MAP = {
+	15: Vector2i(3, 2), 14: Vector2i(3, 1), 13: Vector2i(3, 3),
+	11: Vector2i(4, 2), 7:  Vector2i(2, 2), 10: Vector2i(2, 1),
+	6:  Vector2i(4, 1), 9:  Vector2i(2, 3), 5:  Vector2i(4, 3), 0: Vector2i(3, 2)
+}
 
 func _ready():
-	# Hide the base layer so it purely acts as a template
 	base_layer.hide() 
+	if wall_base_layer: wall_base_layer.hide()
+	add_to_group("generator")
 	_initialize_noise()
 	generate_world()
-	generate_surface_structures()
 	spawn_player()
 
 func _initialize_noise():
 	randomize()
-	var seed_value = randi()
-	
+	var s = randi()
 	surface_noise = FastNoiseLite.new()
-	surface_noise.seed = seed_value
-	surface_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
-	surface_noise.frequency = surface_frequency 
-
+	surface_noise.seed = s
+	surface_noise.frequency = surface_frequency
 	cave_noise = FastNoiseLite.new()
-	cave_noise.seed = seed_value
-	cave_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
+	cave_noise.seed = s + 1
 	cave_noise.frequency = 0.04
-	
-	stone_noise = FastNoiseLite.new()
-	stone_noise.seed = seed_value + 1 
-	stone_noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
-	stone_noise.frequency = 0.06 
-
-# --- NEW CHUNK MANAGER ---
-func get_or_create_chunk(x_pos: int) -> TileMapLayer:
-	# Calculate which chunk this X coordinate belongs to (e.g., x=150 is chunk 1)
-	var chunk_id = floor(x_pos / float(chunk_width))
-	
-	if chunks.has(chunk_id):
-		return chunks[chunk_id]
-		
-	# If chunk doesn't exist, duplicate the base layer to copy your TileSet and Physics
-	var new_chunk = base_layer.duplicate()
-	new_chunk.name = "Chunk_" + str(chunk_id)
-	new_chunk.show()
-	add_child(new_chunk)
-	chunks[chunk_id] = new_chunk
-	
-	return new_chunk
 
 func generate_world():
-	# Clean up old chunks if regenerating
-	for chunk in chunks.values():
-		chunk.queue_free()
+	for c in chunks.values(): c.queue_free()
+	for c in wall_chunks.values(): c.queue_free()
 	chunks.clear()
+	wall_chunks.clear()
+	world_data.clear()
+	wall_data.clear()
 	
+	# PASS 1: Logic
 	for x in range(map_width):
-		var current_surface_y = surface_level + int(surface_noise.get_noise_1d(x) * 15)
-		
-		# Grab the correct TileMapLayer for this specific X column
+		var surf_y = surface_level + int(surface_noise.get_noise_1d(x) * surface_amplitude)
+		for y in range(surf_y, map_height):
+			if not _is_cave(x, y, surf_y):
+				world_data[Vector2i(x, y)] = true
+		for y in range(surf_y + 3, map_height):
+			wall_data[Vector2i(x, y)] = true
+	
+	# PASS 2: Visuals
+	for x in range(map_width):
 		var active_chunk = get_or_create_chunk(x)
+		var active_wall_chunk = get_or_create_wall_chunk(x)
 		
 		for y in range(map_height):
-			if y < current_surface_y:
-				continue 
-				
-			var is_cave = false
-			var depth = y - current_surface_y
-			var cave_threshold = 0.0
-			
-			if depth < 4:
-				cave_threshold = 0.45 
-			elif depth < 20:
-				cave_threshold = 0.25
-			else:
-				cave_threshold = 0.10
-				
-			if cave_noise.get_noise_2d(x, y) > cave_threshold:
-				is_cave = true
-					
-			if not is_cave:
-				var current_source = TILE_DIRT_SOURCE_ID
-				var current_atlas = DIRT_ATLAS
-				
-				if y == current_surface_y:
-					current_source = TILE_GRASS_SOURCE_ID
-					current_atlas = GRASS_ATLAS
-				elif y > current_surface_y + 3:
-					if stone_noise.get_noise_2d(x, y) > 0.10:
-						current_source = TILE_STONE_SOURCE_ID
-						current_atlas = STONE_ATLAS
-				
-				# Place the tile into the specific chunk instead of the base layer
-				active_chunk.set_cell(Vector2i(x, y), current_source, current_atlas)
+			var pos = Vector2i(x, y)
+			if world_data.has(pos):
+				var mask = _get_bitmask(pos, world_data)
+				active_chunk.set_cell(pos, 0, MASK_MAP.get(mask, Vector2i(3, 4)))
+			if wall_data.has(pos):
+				var mask = _get_bitmask(pos, wall_data)
+				active_wall_chunk.set_cell(pos, 1, WALL_MASK_MAP.get(mask, Vector2i(3, 2)))
+		
+		_update_shading_for_column(x, world_data)
 
-func generate_surface_structures():
-	if small_surface_structures.is_empty(): return
-	var last_spawn_x = -min_structure_distance
-	for x in range(map_width):
-		if x - last_spawn_x < min_structure_distance: continue
-		if randf() < structure_spawn_chance:
-			var surface_y = surface_level + int(surface_noise.get_noise_1d(x) * 15)
-			var structure_scene = small_surface_structures.pick_random()
-			var structure_instance = structure_scene.instantiate()
-			add_child(structure_instance)
-			var spawn_pos_map = Vector2i(x, surface_y - 1)
-			structure_instance.global_position = base_layer.map_to_local(spawn_pos_map)
-			last_spawn_x = x
+func update_tile_at(map_pos: Vector2i):
+	var chunk_id = floor(map_pos.x / float(chunk_width))
+	if !chunks.has(chunk_id): return
+	
+	var chunk = chunks[chunk_id]
+	# If the dictionary doesn't have it, ensure the tile is erased
+	if !world_data.has(map_pos):
+		chunk.set_cell(map_pos, -1)
+		return
+
+	# Recalculate bitmask based on neighbors in world_data
+	var mask = _get_bitmask(map_pos, world_data)
+	chunk.set_cell(map_pos, 0, MASK_MAP.get(mask, Vector2i(3, 4)))
+
+func _update_shading_for_column(x: int, data_set: Dictionary):
+	var found_y = -1
+	for y in range(map_height):
+		if data_set.has(Vector2i(x, y)):
+			found_y = y
+			break
+	
+	var c_id = floor(x / float(chunk_width))
+	if chunks.has(c_id) and chunks[c_id].has_method("apply_shading_at"):
+		chunks[c_id].apply_shading_at(x, found_y)
+	if wall_chunks.has(c_id) and wall_chunks[c_id].has_method("apply_shading_at"):
+		wall_chunks[c_id].apply_shading_at(x, found_y)
+
+func _is_cave(x, y, surf_y) -> bool:
+	var depth = y - surf_y
+	var threshold = 0.45 if depth < 5 else (0.2 if depth < 15 else 0.1)
+	return cave_noise.get_noise_2d(x, y) > threshold
+
+func _get_bitmask(pos: Vector2i, data_set: Dictionary) -> int:
+	var mask = 0
+	if data_set.has(pos + Vector2i.UP):    mask |= 1
+	if data_set.has(pos + Vector2i.DOWN):  mask |= 2
+	if data_set.has(pos + Vector2i.LEFT):  mask |= 4
+	if data_set.has(pos + Vector2i.RIGHT): mask |= 8
+	return mask
+
+func get_or_create_chunk(x_pos: int) -> TileMapLayer:
+	var id = floor(x_pos / float(chunk_width))
+	if chunks.has(id): return chunks[id]
+	var new_chunk = base_layer.duplicate()
+	new_chunk.name = "Chunk_" + str(id)
+	new_chunk.show()
+	add_child(new_chunk)
+	chunks[id] = new_chunk
+	return new_chunk
+
+func get_or_create_wall_chunk(x_pos: int) -> TileMapLayer:
+	var id = floor(x_pos / float(chunk_width))
+	if wall_chunks.has(id): return wall_chunks[id]
+	var template = wall_base_layer if wall_base_layer else base_layer
+	var new_chunk = template.duplicate()
+	new_chunk.name = "WallChunk_" + str(id)
+	new_chunk.show()
+	new_chunk.z_index = 3 # Behind foreground
+	add_child(new_chunk)
+	wall_chunks[id] = new_chunk
+	return new_chunk
 
 func spawn_player():
-	if not player_node: return
-	var spawn_x = map_width / 2
-	var spawn_y = surface_level + int(surface_noise.get_noise_1d(spawn_x) * 15)
-	var spawn_pos_map = Vector2i(spawn_x, spawn_y - 2)
-	player_node.global_position = base_layer.map_to_local(spawn_pos_map)
+	if !player_node: return
+	var mid_x = map_width / 2
+	var mid_y = surface_level + int(surface_noise.get_noise_1d(mid_x) * surface_amplitude)
+	player_node.global_position = base_layer.map_to_local(Vector2i(mid_x, mid_y - 5))
+	player_node.generator = self

@@ -9,8 +9,7 @@
 shader = ExtResource("2_5m0x8")
 shader_parameter/color_deep = Color(0.4, 0, 0, 1)
 shader_parameter/color_bright = Color(0.9, 0, 0, 1)
-shader_parameter/speed = 0.01
-shader_parameter/wave_stretch = Vector2(5, 1)
+shader_parameter/health_ratio = 1.0
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_tybkg"]
 

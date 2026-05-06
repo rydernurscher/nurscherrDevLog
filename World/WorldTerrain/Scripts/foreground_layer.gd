@@ -1,59 +1,42 @@
+# res://World/WorldTerrain/Scripts/foreground_layer.gd
 extends TileMapLayer
+class_name TerrainLayer
 
+# How many blocks deep until we reach minimum brightness?
+const MAX_LIGHT_DEPTH: float = 15.0 
+const MIN_BRIGHTNESS: float = 0.05
 
-
-# This dictionary remembers the Y-coordinate of the surface for every X-column
 var surface_heights: Dictionary = {}
 
-func _ready():
-	# Wait one frame to ensure the level is fully loaded
-	await get_tree().process_frame
-	_scan_surface()
-
-func _scan_surface():
-	var rect = get_used_rect()
-	
-	# Loop left-to-right across the entire generated world
-	for x in range(rect.position.x, rect.end.x):
-		# Loop top-to-bottom to find the first solid block
-		for y in range(rect.position.y, rect.end.y):
-			if get_cell_source_id(Vector2i(x, y)) != -1:
-				surface_heights[x] = y
-				break # Found the surface for this column, move to the next X
-				
-				
-	# Tell Godot to apply our custom color changes to all tiles
+func apply_shading_at(x_coord: int, y_surf: int):
+	surface_heights[x_coord] = y_surf
 	notify_runtime_tile_data_update()
 
-
-
-# ---------------------------------------------------
-# Runtime Shading Generation
-# ---------------------------------------------------
-
 func _use_tile_data_runtime_update(_coords: Vector2i) -> bool:
-	# Return true so Godot processes every single tile through the function below
 	return true
 
-func _tile_data_runtime_update(_coords: Vector2i, tile_data: TileData):
-	if surface_heights.has(_coords.x):
-		var surface_y = surface_heights[_coords.x]
+func _tile_data_runtime_update(coords: Vector2i, tile_data: TileData):
+	if surface_heights.has(coords.x):
+		var surface_y = surface_heights[coords.x]
 		
-		# How many blocks deep is this specific tile from the absolute surface?
-		var depth = _coords.y - surface_y
-		
-		# Set how many tiles deep remain at 100% brightness and color
-		var fully_bright_tiles = 0
-		
-		if depth > fully_bright_tiles:
-			# Calculate how far past our safe zone we are
-			var dark_depth = depth - fully_bright_tiles
-			
-			# Subtract 20% brightness for every block PAST the bright zone
-			var brightness = max(1.0 - (dark_depth * 0.15), 0.05)
-			
-			# Tint the deep blocks darker
-			tile_data.modulate = Color(brightness, brightness, brightness, 1.0)
-		else:
-			# Guarantee the surface and the top tiles stay perfectly bright
+		# If no surface block in this column, keep it bright (sky)
+		if surface_y == -1 or coords.y < surface_y:
 			tile_data.modulate = Color.WHITE
+			return
+			
+		var depth = float(coords.y - surface_y)
+		
+		# 1. Calculate base brightness (1.0 at surface, fading to 0.05 at depth 25)
+		# We use smoothstep or simple division for a smooth transition
+		var light_percent = 1.0 - (depth / MAX_LIGHT_DEPTH)
+		var light_level = clamp(light_percent, MIN_BRIGHTNESS, 1.0)
+		
+		# 2. Handle Walls vs Blocks
+		# Walls are background, so they start 40% darker than the surface blocks
+		if "Wall" in name:
+			light_level *= 0.6
+			# Ensure walls still don't go below the absolute minimum
+			light_level = max(light_level, MIN_BRIGHTNESS)
+		
+		# 3. Apply the color
+		tile_data.modulate = Color(light_level, light_level, light_level, 1.0)

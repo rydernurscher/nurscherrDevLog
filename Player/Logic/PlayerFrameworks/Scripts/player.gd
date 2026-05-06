@@ -6,265 +6,249 @@ signal health_changed(new_health)
 signal mana_changed(new_mana)
 signal stamina_changed(new_stamina)
 
+# --- ENUMS & STATES ---
+enum State { IDLE, MOVE, ROLL, ATTACK, FLY, HURT }
+var current_state: State = State.IDLE
+
 # --- CONFIGURATION ---
 @export_group("Movement")
-@export var SPEED = 160.0
-@export var ACCELERATION_GROUND = 800.0
-@export var FRICTION_GROUND = 1000.0
-@export var ACCELERATION_AIR = 400.0
-@export var FRICTION_AIR = 200.0
-@export var ROLL_SPEED = 280.0
+@export var SPEED: float = 165.0
+@export var ACCELERATION: float = 1100.0
+@export var FRICTION: float = 1300.0
+@export var ROLL_SPEED: float = 310.0
+@export var ROLL_DURATION: float = 0.25
 
-@export_group("Jumping & Gravity")
-@export var JUMP_VELOCITY = -320.0
-@export var JUMP_RELEASE_MULTIPLIER = 0.5 
-@export var GRAVITY_SCALE = 1.0
-@export var FALL_GRAVITY_SCALE = 1.5      
-@export var JUMP_BUFFER_TIME = 0.1
-@export var COYOTE_TIME = 0.1
+@export_group("Jumping & Flight")
+@export var JUMP_VELOCITY: float = -330.0
+@export var COYOTE_TIME: float = 0.15
+@export var JUMP_BUFFER: float = 0.15
+@export var FLIGHT_POWER: float = 35.0 
 
-@export_group("Souls Stats")
+@export_group("Stats & Combat")
 @export var max_health: float = 100.0
-@export var health_regen_rate: float = 2.0
-@export var max_mana: float = 50.0
-@export var mana_regen_rate: float = 5.0
+@export var health_regen: float = 1.5
 @export var max_stamina: float = 100.0
-@export var stamina_regen_rate: float = 25.0
-
-@export_group("Inventory & World")
+@export var stamina_regen: float = 30.0
+@export var max_mana: float = 50.0
+@export var mana_regen: float = 5.0
 @export var equipped_weapon: WeaponData
-@export var chunk_width: int = 100
-@export var WING_ACCELERATION = 25.0 
-@export var MAX_FLIGHT_ASCENT_SPEED = -400.0 
 
 # --- INTERNAL VARIABLES ---
-var current_health: float = 100.0
-var current_mana: float = 50.0
-var current_stamina: float = 100.0
+var current_health: float
+var current_stamina: float
+var current_mana: float
 
-var inventory: Array[WeaponData] = [] 
-var block_inventory: Dictionary = {} 
-var chunks: Dictionary = {}
-var surface_heights: Dictionary = {}
-
-var is_hurting: bool = false
-var is_rolling: bool = false
-var is_attacking: bool = false
-var i_frames_active: bool = false
-var is_flying: bool = false 
-var facing_direction: int = 1 
-
-var roll_duration: float = 0.4
-var roll_timer: float = 0.0
 var coyote_timer: float = 0.0
 var jump_buffer_timer: float = 0.0
+var roll_timer: float = 0.0
+var attack_timer: float = 0.0
+var stun_timer: float = 0.0
+var facing_direction: int = 1
 
-@onready var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 @onready var sprite = $AnimatedSprite2D
-@onready var hurt_anim = $HurtAnim
 @onready var wings = $AnimatedSprite2D/Wings if has_node("AnimatedSprite2D/Wings") else null
-@onready var hitbox = $Hitbox
-@onready var terrain_layer = get_tree().get_first_node_in_group("terrain")
+@onready var hitbox = $Hitbox if has_node("Hitbox") else null
+@onready var ui = $PlayerUI
+@onready var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
+
+# References assigned by WorldGenerator
+var generator: WorldGenerator 
 
 # --- INITIALIZATION ---
 func _ready():
 	current_health = max_health
-	current_mana = max_mana
 	current_stamina = max_stamina
+	current_mana = max_mana
 	
-	if wings: wings.visible = false
-	hurt_anim.visible = false
-	hurt_anim.animation_finished.connect(_on_hurt_finished)
-	
+	add_to_group("player")
 	_setup_ui()
 
 func _setup_ui():
-	var ui = get_node_or_null("PlayerUI")
 	if ui:
 		ui.set_max_stats(max_health, max_mana, max_stamina)
-		health_changed.connect(ui.update_health)
-		mana_changed.connect(ui.update_mana)
-		stamina_changed.connect(ui.update_stamina)
+		# Ensure signals are connected to the UI script methods
+		if not health_changed.is_connected(ui.update_health):
+			health_changed.connect(ui.update_health)
+		if not mana_changed.is_connected(ui.update_mana):
+			mana_changed.connect(ui.update_mana)
+		if not stamina_changed.is_connected(ui.update_stamina):
+			stamina_changed.connect(ui.update_stamina)
+		
+		# Set initial values
 		health_changed.emit(current_health)
 		mana_changed.emit(current_mana)
 		stamina_changed.emit(current_stamina)
 
-func _on_hurt_finished():
-	# Note: Only resetting if the hurt animation specifically finished
-	is_hurting = false
-	hurt_anim.visible = false
-
-# --- PHYSICS & INPUT ---
+# --- MAIN LOOP ---
 func _physics_process(delta):
 	_update_timers(delta)
 	_regen_stats(delta)
 	
-	if is_rolling:
-		_process_roll(delta)
-	elif is_attacking:
-		velocity.x = move_toward(velocity.x, 0, FRICTION_GROUND * delta)
-		_apply_gravity(delta)
-	else:
-		_handle_movement(delta)
-		_apply_gravity(delta)
-		_handle_mouse_flip()
+	match current_state:
+		State.ROLL:
+			_process_roll(delta)
+		State.ATTACK:
+			_process_attack(delta)
+		State.HURT:
+			_process_hurt(delta)
+		_: # IDLE, MOVE, FLY
+			_process_standard_movement(delta)
 	
 	move_and_slide()
 	_update_animations()
+	_handle_mouse_flip()
 
-func _update_timers(delta):
-	coyote_timer = COYOTE_TIME if is_on_floor() else coyote_timer - delta
-	jump_buffer_timer -= delta
+# --- INPUT & MOVEMENT ---
+func _process_standard_movement(delta):
+	var dir = Input.get_axis("left", "right")
+	
+	# Horizontal
+	if dir != 0:
+		velocity.x = move_toward(velocity.x, dir * SPEED, ACCELERATION * delta)
+		facing_direction = sign(dir)
+		if is_on_floor(): current_state = State.MOVE
+	else:
+		velocity.x = move_toward(velocity.x, 0, FRICTION * delta)
+		if is_on_floor(): current_state = State.IDLE
 
-func _handle_mouse_flip():
-	var mouse_pos = get_global_mouse_position()
-	var is_left = mouse_pos.x < global_position.x
-	sprite.flip_h = is_left
-	if wings: wings.flip_h = is_left
-
-func _apply_gravity(delta):
-	if is_flying: return
-	var active_scale = FALL_GRAVITY_SCALE if velocity.y > 0 else GRAVITY_SCALE
-	velocity.y += gravity * active_scale * delta
-
-func _handle_movement(delta):
-	# Jump Logic
-	if Input.is_action_just_pressed("jump"): jump_buffer_timer = JUMP_BUFFER_TIME
+	# Jump logic
+	if Input.is_action_just_pressed("jump"): jump_buffer_timer = JUMP_BUFFER
 	
 	if jump_buffer_timer > 0 and coyote_timer > 0:
 		velocity.y = JUMP_VELOCITY
-		jump_buffer_timer = 0.0
-		coyote_timer = 0.0
+		jump_buffer_timer = 0
+		coyote_timer = 0
 	elif Input.is_action_pressed("jump") and not is_on_floor():
-		is_flying = true
-		velocity.y = max(velocity.y - WING_ACCELERATION, MAX_FLIGHT_ASCENT_SPEED)
+		velocity.y = max(velocity.y - FLIGHT_POWER, -220.0)
+		current_state = State.FLY
 	else:
-		is_flying = false
-		if Input.is_action_just_released("jump") and velocity.y < 0:
-			velocity.y *= JUMP_RELEASE_MULTIPLIER
+		_apply_gravity(delta)
 
-	# Combat/Roll Triggers
-	if Input.is_action_just_pressed("roll") and current_stamina >= 25.0 and is_on_floor():
+	# Action Triggers
+	if Input.is_action_just_pressed("roll") and is_on_floor() and current_stamina >= 20:
 		_start_roll()
-		return
-	if Input.is_action_just_pressed("attack") and current_stamina >= 15.0:
-		_attack()
-		return
+	elif Input.is_action_just_pressed("attack") and current_stamina >= 15:
+		_start_attack()
+	
+	if Input.is_action_pressed("mine"):
+		_handle_mining()
 
-	# Horizontal Movement
-	var dir = Input.get_axis("left", "right")
-	var accel = ACCELERATION_GROUND if is_on_floor() else ACCELERATION_AIR
-	var frict = FRICTION_GROUND if is_on_floor() else FRICTION_AIR
-	
-	if dir != 0:
-		facing_direction = sign(dir)
-		velocity.x = move_toward(velocity.x, dir * SPEED, accel * delta)
-	else:
-		velocity.x = move_toward(velocity.x, 0, frict * delta)
-
-# --- ANIMATION CONTROLLER ---
-func _update_animations():
-	if is_hurting: return # Lock animations while flinching
-	
-	
-	if is_attacking:
-		if sprite.sprite_frames.has_animation("attack"): sprite.play("attack")
-	elif is_on_floor():
-		if wings: wings.visible = false	
-		sprite.play("run" if velocity.x != 0 else "idle")
-	elif is_flying and wings:
-		wings.visible = true
-		wings.play("fly")
-		sprite.play("jump")
-	else:
-		sprite.play("jump")
+func _input(event):
+	# Debug Keys
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_H:
+			take_damage(20.0)
+		if event.keycode == KEY_M:
+			current_mana = max(0, current_mana - 15)
+			mana_changed.emit(current_mana)
 
 # --- MECHANICS ---
+func _handle_mining():
+	if !generator: return
+	
+	var m_pos = get_global_mouse_position()
+	if global_position.distance_to(m_pos) > 80.0: return
+	
+	# Use the generator's base layer to find the map coordinate
+	var map_pos = generator.base_layer.local_to_map(m_pos)
+	
+	if generator.world_data.has(map_pos):
+		# 1. Erase from the logic dictionary
+		generator.world_data.erase(map_pos)
+		
+		# 2. Update the visual TileMapLayer and neighbors
+		generator.update_tile_at(map_pos)
+		generator.update_tile_at(map_pos + Vector2i.UP)
+		generator.update_tile_at(map_pos + Vector2i.DOWN)
+		generator.update_tile_at(map_pos + Vector2i.LEFT)
+		generator.update_tile_at(map_pos + Vector2i.RIGHT)
+		
+		# 3. Recalculate lighting for the column
+		generator._update_shading_for_column(map_pos.x, generator.world_data)
+
 func _start_roll():
-	is_rolling = true
-	i_frames_active = true
-	current_stamina -= 25.0
+	current_state = State.ROLL
+	roll_timer = ROLL_DURATION
+	current_stamina -= 20.0
 	stamina_changed.emit(current_stamina)
-	roll_timer = roll_duration
 	velocity.x = facing_direction * ROLL_SPEED
 
-func _process_roll(delta):
-	roll_timer -= delta
-	if roll_timer <= 0:
-		is_rolling = false
-		i_frames_active = false
+func _process_roll(_delta):
+	if roll_timer <= 0: current_state = State.IDLE
 
-func _attack():
-	if !equipped_weapon or current_stamina < equipped_weapon.stamina_cost: return
-	is_attacking = true
+func _start_attack():
+	if !equipped_weapon: return
+	current_state = State.ATTACK
+	attack_timer = equipped_weapon.attack_duration
 	current_stamina -= equipped_weapon.stamina_cost
 	stamina_changed.emit(current_stamina)
-	
-	if hitbox: hitbox.damage = equipped_weapon.damage 
-	if sprite.sprite_frames.has_animation(equipped_weapon.animation_name):
-		sprite.play(equipped_weapon.animation_name)
-	
-	await get_tree().create_timer(equipped_weapon.attack_duration).timeout
-	is_attacking = false
+	if hitbox: hitbox.damage = equipped_weapon.damage
 
-func _regen_stats(delta):
-	if !is_rolling and !is_attacking:
-		current_stamina = min(current_stamina + (stamina_regen_rate * delta), max_stamina)
-		stamina_changed.emit(current_stamina)
-	
-	if current_health > 0:
-		current_health = min(current_health + (health_regen_rate * delta), max_health)
-		health_changed.emit(current_health)
-		
-	current_mana = min(current_mana + (mana_regen_rate * delta), max_mana)
-	mana_changed.emit(current_mana)
+func _process_attack(delta):
+	_apply_gravity(delta)
+	velocity.x = move_toward(velocity.x, 0, FRICTION * 0.4 * delta)
+	if attack_timer <= 0: current_state = State.IDLE
 
 func take_damage(amount: float):
-	if i_frames_active or current_health <= 0: return
+	if current_state == State.ROLL or current_health <= 0: return
 	
-	current_health = clamp(current_health - amount, 0.0, max_health)
+	current_health = clamp(current_health - amount, 0, max_health)
 	health_changed.emit(current_health)
 	
-	is_hurting = true
-	hurt_anim.visible = true
-	hurt_anim.play_backwards("hurt")
+	# Flash sprite red
+	var tw = create_tween()
+	sprite.modulate = Color(5, 0.5, 0.5)
+	tw.tween_property(sprite, "modulate", Color.WHITE, 0.2)
 	
 	if current_health <= 0: die()
 
 func die():
-	print("YOU DIED")
+	get_tree().reload_current_scene()
 
-# --- WORLD INTERACTION ---
-func mine_block(world_pos: Vector2):
-	var map_pos = terrain_layer.local_to_map(world_pos)
-	var chunk_id = floor(map_pos.x / float(chunk_width))
+# --- UTILS ---
+func _update_timers(delta):
+	coyote_timer = COYOTE_TIME if is_on_floor() else coyote_timer - delta
+	jump_buffer_timer -= delta
+	if roll_timer > 0: roll_timer -= delta
+	if attack_timer > 0: attack_timer -= delta
+	if stun_timer > 0: stun_timer -= delta
+
+func _regen_stats(delta):
+	if current_state != State.ROLL and current_state != State.ATTACK:
+		current_stamina = move_toward(current_stamina, max_stamina, stamina_regen * delta)
+		stamina_changed.emit(current_stamina)
 	
-	if not chunks.has(chunk_id): return
-	var target_chunk = chunks[chunk_id]
-	var mined_id = target_chunk.get_cell_source_id(map_pos)
+	current_health = move_toward(current_health, max_health, health_regen * delta)
+	health_changed.emit(current_health)
 	
-	if mined_id != -1:
-		add_block("dirt" if mined_id == 0 else "stone")
-		target_chunk.set_cell(map_pos, -1) # Using set_cell for performance in chunks
-		
-		if surface_heights.get(map_pos.x) == map_pos.y:
-			var new_y = map_pos.y + 1
-			while target_chunk.get_cell_source_id(Vector2i(map_pos.x, new_y)) == -1 and new_y < 1000:
-				new_y += 1
-			surface_heights[map_pos.x] = new_y
-			target_chunk.notify_runtime_tile_data_update()
+	current_mana = move_toward(current_mana, max_mana, mana_regen * delta)
+	mana_changed.emit(current_mana)
 
-func add_block(block_name: String, amount: int = 1):
-	block_inventory[block_name] = block_inventory.get(block_name, 0) + amount
+func _handle_mouse_flip():
+	if current_state != State.ROLL and current_state != State.HURT:
+		var is_left = get_global_mouse_position().x < global_position.x
+		sprite.flip_h = is_left
+		if wings: wings.flip_h = is_left
 
-func _unhandled_input(event):
-	if event is InputEventKey and event.pressed:
-		if event.keycode == KEY_H: take_damage(20.0) 
-		if event.keycode == KEY_M: 
-			current_mana = max(current_mana - 15.0, 0.0)
-			mana_changed.emit(current_mana)
+func _apply_gravity(delta):
+	var mult = 1.6 if velocity.y > 0 else 1.0
+	velocity.y += gravity * mult * delta
 
-	if event.is_action_pressed("mine"):
-		var m_pos = get_global_mouse_position()
-		if terrain_layer and global_position.distance_to(m_pos) < 80.0:
-			mine_block(m_pos)
+func _update_animations():
+	match current_state:
+		State.IDLE: sprite.play("idle")
+		State.MOVE: sprite.play("run")
+		State.ATTACK: sprite.play("attack")
+		State.ROLL: sprite.play("roll")
+		State.FLY:
+			sprite.play("jump")
+			if wings:
+				wings.visible = true
+				wings.play("fly")
+	
+	if current_state != State.FLY and wings:
+		wings.visible = false
+
+func _process_hurt(delta):
+	_apply_gravity(delta)
+	if stun_timer <= 0: current_state = State.IDLE
