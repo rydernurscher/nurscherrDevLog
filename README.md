@@ -43,7 +43,7 @@ The project is currently in the **Technical Foundation** phase.
 *   [x] Procedural terrain generation with cave systems.
 *   [x] Responsive character controller with combat stats.
 *   [x] Background/Foreground wall and block system.
-*   [x] High-end post-processing pipeline.
+*   [ ] High-end post-processing pipeline.
 *   [ ] Procedural tree/landmark spawning (In Progress).
 *   [ ] Enemy AI and Boss encounter framework (Planned).
 
