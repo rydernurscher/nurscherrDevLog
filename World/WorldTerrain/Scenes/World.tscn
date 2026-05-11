@@ -1,12 +1,28 @@
 [gd_scene format=3 uid="uid://drv5nrbnuw8ni"]
 
 [ext_resource type="Script" uid="uid://by4yy80x4ga2p" path="res://World/WorldTerrain/Scripts/world.gd" id="1_qncns"]
+[ext_resource type="Shader" uid="uid://csncslrpxw7hy" path="res://World/Effects/Shaders/NightSky.gdshader" id="2_diavc"]
 [ext_resource type="TileSet" uid="uid://wn4mtjavttbh" path="res://assets/Environment/Tilesets/GrassBlock/MainTerrain.tres" id="3_qur2g"]
-[ext_resource type="Script" uid="uid://cu01qebuqlb0d" path="res://World/WorldTerrain/Scripts/foreground_layer.gd" id="4_yvxt5"]
 [ext_resource type="Texture2D" uid="uid://bf7kdx6ygpcqi" path="res://assets/Environment/background1.png" id="5_ubbky"]
+[ext_resource type="Texture2D" uid="uid://dlx6uakuuvhnt" path="res://assets/Environment/Tilesets/DecoBG/RockBush1.png" id="6_diavc"]
 [ext_resource type="Texture2D" uid="uid://8eqssa8uswqr" path="res://assets/Environment/background2.png" id="6_nnetf"]
 [ext_resource type="Texture2D" uid="uid://dk8vkx0l6ems4" path="res://assets/Environment/background3.png" id="7_s8apy"]
 [ext_resource type="PackedScene" uid="uid://cfxueluo5j5ap" path="res://Player/Logic/PlayerFrameworks/Scenes/player.tscn" id="9_jvuqk"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qur2g"]
+shader = ExtResource("2_diavc")
+shader_parameter/night_color = Color(0.02, 0.05, 0.15, 1)
+shader_parameter/brightness = 0.650000030875
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qncns"]
+shader = ExtResource("2_diavc")
+shader_parameter/night_color = Color(0.02, 0.05, 0.15, 1)
+shader_parameter/brightness = 0.730000034675
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_diavc"]
+shader = ExtResource("2_diavc")
+shader_parameter/night_color = Color(0.05, 0.08, 0.18, 1)
+shader_parameter/brightness = 0.9
 
 [sub_resource type="Environment" id="Environment_js7pq"]
 background_mode = 3
@@ -14,7 +30,7 @@ ambient_light_source = 2
 ambient_light_color = Color(0.6637184, 0.5182143, 0.16247293, 1)
 ambient_light_energy = 6.44
 reflected_light_source = 2
-tonemap_mode = 1
+tonemap_mode = 3
 ssao_enabled = true
 glow_enabled = true
 glow_levels/4 = 9.24
@@ -31,58 +47,76 @@ glow_blend_mode = 2
 script = ExtResource("1_qncns")
 player_node = NodePath("Player/Player")
 
-[node name="ForegroundLayer" type="TileMapLayer" parent="." unique_id=1110115016 groups=["terrain"]]
-z_index = 4
-z_as_relative = false
-tile_set = ExtResource("3_qur2g")
-collision_visibility_mode = 2
-script = ExtResource("4_yvxt5")
+[node name="ParallaxBackground" type="ParallaxBackground" parent="." unique_id=1221704183]
+offset = Vector2(-400, -700)
+scale = Vector2(2, 2)
+transform = Transform2D(2, 0, 0, 2, -400, -700)
+
+[node name="Far Sky" type="ParallaxLayer" parent="ParallaxBackground" unique_id=997833902]
+motion_scale = Vector2(0.001, 0)
+motion_mirroring = Vector2(1000, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/Far Sky" unique_id=464327808]
+material = SubResource("ShaderMaterial_qur2g")
+position = Vector2(630.5, 464.5)
+scale = Vector2(1.6421875, 1.7265625)
+texture = ExtResource("5_ubbky")
+
+[node name="Far Mountains" type="ParallaxLayer" parent="ParallaxBackground" unique_id=834525781]
+motion_scale = Vector2(0.01, 0)
+motion_mirroring = Vector2(1500, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/Far Mountains" unique_id=463151101]
+texture_filter = 2
+texture_repeat = 3
+material = SubResource("ShaderMaterial_qncns")
+position = Vector2(849.75, 259)
+scale = Vector2(2.3992188, 1)
+texture = ExtResource("6_nnetf")
+
+[node name="Close Mountains" type="ParallaxLayer" parent="ParallaxBackground" unique_id=1300154281]
+motion_scale = Vector2(0.025, 0)
+motion_mirroring = Vector2(1560, 150)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/Close Mountains" unique_id=2025911431]
+material = SubResource("ShaderMaterial_diavc")
+position = Vector2(834.75, 304)
+scale = Vector2(2.4617188, 1)
+texture = ExtResource("7_s8apy")
+
+[node name="Foliage BG" type="ParallaxLayer" parent="ParallaxBackground" unique_id=1674741707]
+motion_scale = Vector2(0.25, 0)
+motion_mirroring = Vector2(305, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/Foliage BG" unique_id=1957514543]
+material = SubResource("ShaderMaterial_diavc")
+position = Vector2(151.5, 368)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("6_diavc")
+
+[node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=1594210492]
+z_index = -1000
+color = Color(0.015686275, 0, 0.24705882, 1)
 
 [node name="BackgroundLayer" type="TileMapLayer" parent="." unique_id=1989235220]
 z_index = 3
 tile_set = ExtResource("3_qur2g")
 collision_enabled = false
-script = ExtResource("4_yvxt5")
 
-[node name="ParallaxBackground" type="ParallaxBackground" parent="." unique_id=1221704183]
-offset = Vector2(-400, -400)
-scale = Vector2(2, 2)
-transform = Transform2D(2, 0, 0, 2, -400, -400)
+[node name="ForegroundLayer" type="TileMapLayer" parent="." unique_id=1110115016 groups=["terrain"]]
+z_index = 4
+z_as_relative = false
+tile_set = ExtResource("3_qur2g")
+collision_visibility_mode = 2
 
-[node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground" unique_id=997833902]
-motion_scale = Vector2(0.001, 0)
-motion_mirroring = Vector2(1000, 0)
+[node name="Player" parent="." unique_id=619370920 instance=ExtResource("9_jvuqk")]
 
-[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer" unique_id=464327808]
-position = Vector2(630.5, 464.5)
-scale = Vector2(1.6421875, 1.7265625)
-texture = ExtResource("5_ubbky")
-
-[node name="ParallaxLayer2" type="ParallaxLayer" parent="ParallaxBackground" unique_id=834525781]
-motion_scale = Vector2(0.01, 0)
-motion_mirroring = Vector2(1500, 0)
-
-[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer2" unique_id=463151101]
-texture_filter = 2
-texture_repeat = 3
-position = Vector2(849.75, 259)
-scale = Vector2(2.3992188, 1)
-texture = ExtResource("6_nnetf")
-
-[node name="ParallaxLayer3" type="ParallaxLayer" parent="ParallaxBackground" unique_id=1300154281]
-motion_scale = Vector2(0.025, 0)
-motion_mirroring = Vector2(1560, 150)
-
-[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer3" unique_id=2025911431]
-position = Vector2(834.75, 304)
-scale = Vector2(2.4617188, 1)
-texture = ExtResource("7_s8apy")
+[node name="Player" parent="Player" index="0" unique_id=1225257479]
+collision_mask = 5
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1113306821]
 environment = SubResource("Environment_js7pq")
 camera_attributes = SubResource("CameraAttributesPractical_eu7l1")
 compositor = SubResource("Compositor_p1v5b")
-
-[node name="Player" parent="." unique_id=619370920 instance=ExtResource("9_jvuqk")]
 
 [editable path="Player"]

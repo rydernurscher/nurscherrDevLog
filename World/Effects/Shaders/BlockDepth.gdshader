@@ -1,25 +1,16 @@
 shader_type canvas_item;
 
-// You can edit these values directly in the Godot Inspector later!
-uniform float surface_y = 300.0;      // The Y pixel coordinate where darkness begins
-uniform float pitch_black_y = 1000.0; // The Y pixel coordinate where it becomes fully black
-
-varying vec2 world_pos;
-
-void vertex() {
-	// Grab the absolute world coordinates of the tiles
-	world_pos = (MODEL_MATRIX * vec4(VERTEX, 0.0, 1.0)).xy;
+void fragment() {
+	vec4 tex_color = texture(TEXTURE, UV);
+	// COLOR.rgb is the depth-based shading we set in GDScript
+	// We treat it as the "minimum" brightness
+	vec3 ambient = COLOR.rgb;
+	COLOR = vec4(tex_color.rgb * ambient, tex_color.a);
 }
 
-void fragment() {
-	// Get the original colors of your tile sprites
-	vec4 original_color = texture(TEXTURE, UV);
-	
-	// Calculate the depth percentage (0.0 is the surface, 1.0 is pitch black)
-	float depth = clamp((world_pos.y - surface_y) / (pitch_black_y - surface_y), 0.0, 1.0);
-	
-	// Darken the block (1.0 is full color, 0.0 is pitch black)
-	original_color.rgb *= (1.0 - depth);
-	
-	COLOR = original_color;
+void light() {
+	// This allows PointLight2D (Torches/Aura) to add brightness 
+	// even if the block is deep underground (ambient is near 0)
+	float boost = LIGHT_ENERGY;
+	LIGHT = vec4(LIGHT_COLOR.rgb * boost, LIGHT_COLOR.a);
 }

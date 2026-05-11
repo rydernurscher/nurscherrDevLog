@@ -98,6 +98,8 @@ func _physics_process(delta):
 	_update_animations()
 	_handle_mouse_flip()
 
+
+	
 # --- INPUT & MOVEMENT ---
 func _process_standard_movement(delta):
 	var dir = Input.get_axis("left", "right")
@@ -156,12 +158,12 @@ func _handle_mining():
 		# 1. Erase from the logic dictionary
 		generator.world_data.erase(map_pos)
 		
-		# 2. Update the visual TileMapLayer and neighbors
-		generator.update_tile_at(map_pos)
-		generator.update_tile_at(map_pos + Vector2i.UP)
-		generator.update_tile_at(map_pos + Vector2i.DOWN)
-		generator.update_tile_at(map_pos + Vector2i.LEFT)
-		generator.update_tile_at(map_pos + Vector2i.RIGHT)
+		# 2. Update a 3x3 grid centered on the mined block
+		# This ensures cardinal AND diagonal neighbors (inner corners) update correctly
+		for x in range(-1, 2):
+			for y in range(-1, 2):
+				var target_pos = map_pos + Vector2i(x, y)
+				generator.update_tile_at(target_pos)
 		
 		# 3. Recalculate lighting for the column
 		generator._update_shading_for_column(map_pos.x, generator.world_data)
@@ -197,7 +199,7 @@ func take_damage(amount: float):
 	
 	# Flash sprite red
 	var tw = create_tween()
-	sprite.modulate = Color(5, 0.5, 0.5)
+	sprite.modulate = Color(5, 0, 0)
 	tw.tween_property(sprite, "modulate", Color.WHITE, 1.0)
 	
 	if current_health <= 0: die()
@@ -229,6 +231,8 @@ func _handle_mouse_flip():
 		var is_left = get_global_mouse_position().x < global_position.x
 		sprite.flip_h = is_left
 		if wings: wings.flip_h = is_left
+		
+
 
 func _apply_gravity(delta):
 	var mult = 1.6 if velocity.y > 0 else 1.0

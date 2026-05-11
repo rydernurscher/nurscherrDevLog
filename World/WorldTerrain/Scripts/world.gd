@@ -17,6 +17,7 @@ class_name WorldGenerator
 @onready var base_layer: TileMapLayer = $ForegroundLayer
 @onready var wall_base_layer: TileMapLayer = get_node_or_null("BackgroundLayer")
 
+
 # Master data dictionary
 var world_data: Dictionary = {}
 var wall_data: Dictionary = {}
@@ -28,9 +29,25 @@ var cave_noise: FastNoiseLite
 
 # Mapping for 0-15 bitmask
 const MASK_MAP = {
+# --- Standard Cardinal Set ---
 	15: Vector2i(3, 4), 14: Vector2i(3, 3), 13: Vector2i(3, 5),
 	11: Vector2i(2, 4), 7:  Vector2i(4, 4), 10: Vector2i(2, 3),
-	6:  Vector2i(4, 3), 9:  Vector2i(2, 5), 5:  Vector2i(4, 5), 0: Vector2i(3, 3)
+	6:  Vector2i(4, 3), 9:  Vector2i(2, 5), 5:  Vector2i(4, 5), 
+	
+	# --- Cap/Line Set ---
+	0:  Vector2i(1, 6), # Isolated
+	3:  Vector2i(1, 4), # Vertical Line
+	12: Vector2i(3, 6), # Horizontal Line
+	1:  Vector2i(1, 5), # Bottom Cap
+	2:  Vector2i(1, 3), # Top Cap
+	4:  Vector2i(4, 6), # Right Cap
+	8:  Vector2i(2, 6), # Left Cap
+	
+	# --- Inner Corners (The "Grace" connections) ---
+	100: Vector2i(6, 4), # Inner Top-Left
+	101: Vector2i(5, 4), # Inner Top-Right
+	102: Vector2i(6, 3), # Inner Bottom-Left
+	103: Vector2i(5, 3)  # Inner Bottom-Right
 }
 
 const WALL_MASK_MAP = {
@@ -95,12 +112,11 @@ func update_tile_at(map_pos: Vector2i):
 	if !chunks.has(chunk_id): return
 	
 	var chunk = chunks[chunk_id]
-	# If the dictionary doesn't have it, ensure the tile is erased
 	if !world_data.has(map_pos):
-		chunk.set_cell(map_pos, -1)
+		chunk.set_cell(map_pos, -1) # Clear visual tile
 		return
 
-	# Recalculate bitmask based on neighbors in world_data
+	# This MUST use the logic that checks diagonals now
 	var mask = _get_bitmask(map_pos, world_data)
 	chunk.set_cell(map_pos, 0, MASK_MAP.get(mask, Vector2i(3, 4)))
 
@@ -124,10 +140,31 @@ func _is_cave(x, y, surf_y) -> bool:
 
 func _get_bitmask(pos: Vector2i, data_set: Dictionary) -> int:
 	var mask = 0
-	if data_set.has(pos + Vector2i.UP):    mask |= 1
-	if data_set.has(pos + Vector2i.DOWN):  mask |= 2
-	if data_set.has(pos + Vector2i.LEFT):  mask |= 4
-	if data_set.has(pos + Vector2i.RIGHT): mask |= 8
+	# Cardinal Checks
+	var top    = data_set.has(pos + Vector2i.UP)
+	var bottom = data_set.has(pos + Vector2i.DOWN)
+	var left   = data_set.has(pos + Vector2i.LEFT)
+	var right  = data_set.has(pos + Vector2i.RIGHT)
+	
+	if top:    mask |= 1
+	if bottom: mask |= 2
+	if left:   mask |= 4
+	if right:  mask |= 8
+	
+	# Inner Corner Logic
+	# If we have cardinal neighbors but are MISSING a diagonal, we override the mask
+	if mask == 15: # Full Cardinal Surround
+		if not data_set.has(pos + Vector2i(-1, -1)): return 100 # Inner Top-Left missing
+		if not data_set.has(pos + Vector2i(1, -1)):  return 101 # Inner Top-Right missing
+		if not data_set.has(pos + Vector2i(-1, 1)):  return 102 # Inner Bottom-Left missing
+		if not data_set.has(pos + Vector2i(1, 1)):   return 103 # Inner Bottom-Right missing
+		
+	# Specific corner cases (e.g. L-shapes)
+	if mask == 10 and not data_set.has(pos + Vector2i(1, 1)):   return 103 # Bottom-Right inner
+	if mask == 6  and not data_set.has(pos + Vector2i(-1, 1)):  return 102 # Bottom-Left inner
+	if mask == 9  and not data_set.has(pos + Vector2i(1, -1)):  return 101 # Top-Right inner
+	if mask == 5  and not data_set.has(pos + Vector2i(-1, -1)): return 100 # Top-Left inner
+	
 	return mask
 
 func get_or_create_chunk(x_pos: int) -> TileMapLayer:
