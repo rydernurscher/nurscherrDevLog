@@ -162,19 +162,6 @@ animations = [{
 "speed": 5.0
 }]
 
-[sub_resource type="Gradient" id="Gradient_w1ybu"]
-interpolation_mode = 2
-interpolation_color_space = 2
-colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 0)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_m8qxq"]
-gradient = SubResource("Gradient_w1ybu")
-width = 100
-height = 100
-use_hdr = true
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-
 [node name="Player" type="Node2D" unique_id=619370920]
 
 [node name="Player" type="CharacterBody2D" parent="." unique_id=1225257479]
@@ -222,15 +209,16 @@ collision_layer = 8
 
 [node name="PlayerUI" parent="Player" unique_id=1396024600 instance=ExtResource("7_1jxqw")]
 
-[node name="Wisp" type="PointLight2D" parent="Player" unique_id=1647194872 node_paths=PackedStringArray("target_node")]
+[node name="Wisp" type="Node2D" parent="Player" unique_id=1508945080 node_paths=PackedStringArray("target_node")]
+show_behind_parent = true
 z_as_relative = false
 position = Vector2(48, -16)
-texture = SubResource("GradientTexture2D_m8qxq")
 script = ExtResource("9_m8qxq")
 target_node = NodePath("..")
-friction = 1.4
-orbit_radius = 1000.0
-base_energy = 0.2
+glow_intensity = 1.4
+base_energy = 1.1
+flicker_intensity = 0.006
+pulse_speed = 0.2
 
 [node name="Sprite2D" type="Sprite2D" parent="Player/Wisp" unique_id=970728205]
 visible = false

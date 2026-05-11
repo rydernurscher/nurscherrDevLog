@@ -165,8 +165,7 @@ func _handle_mining():
 				var target_pos = map_pos + Vector2i(x, y)
 				generator.update_tile_at(target_pos)
 		
-		# 3. Recalculate lighting for the column
-		generator._update_shading_for_column(map_pos.x, generator.world_data)
+	
 
 func _start_roll():
 	current_state = State.ROLL
@@ -200,7 +199,7 @@ func take_damage(amount: float):
 	# Flash sprite red
 	var tw = create_tween()
 	sprite.modulate = Color(5, 0, 0)
-	tw.tween_property(sprite, "modulate", Color.WHITE, 1.0)
+	tw.tween_property(sprite, "modulate", Color.WHITE, 0.6)
 	
 	if current_health <= 0: die()
 

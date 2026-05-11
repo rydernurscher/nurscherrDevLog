@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://cnxvjarcr1044"]
+
+[ext_resource type="Texture2D" uid="uid://2ny6enm2ck55" path="res://assets/Environment/Tilesets/LightingObjects/Lightpost1.png" id="1_arrve"]
+
+[sub_resource type="Gradient" id="Gradient_2l6km"]
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_t3e1u"]
+gradient = SubResource("Gradient_2l6km")
+width = 120
+height = 120
+use_hdr = true
+fill = 1
+fill_from = Vector2(0.37391305, 0.4869565)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_i5enm"]
+gradient = SubResource("Gradient_2l6km")
+width = 120
+height = 120
+use_hdr = true
+fill = 1
+fill_from = Vector2(0.66086954, 0.6)
+
+[node name="Node2D" type="Node2D" unique_id=911839546 groups=["lights"]]
+
+[node name="LampPost" type="Sprite2D" parent="." unique_id=692595610]
+texture = ExtResource("1_arrve")
+
+[node name="PointLight2D" type="PointLight2D" parent="." unique_id=839267442]
+shadow_enabled = true
+shadow_filter = 2
+texture = SubResource("GradientTexture2D_t3e1u")
+
+[node name="PointLight2D2" type="PointLight2D" parent="." unique_id=1407075837]
+shadow_enabled = true
+shadow_filter = 2
+texture = SubResource("GradientTexture2D_i5enm")

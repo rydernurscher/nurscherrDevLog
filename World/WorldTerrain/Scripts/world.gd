@@ -9,20 +9,25 @@ class_name WorldGenerator
 
 @export_group("Generation Stats")
 @export var surface_level: int = 60
-@export var surface_amplitude: int = 15 
-@export var surface_frequency: float = 0.015 
+@export var surface_amplitude: int = 15
+@export var surface_frequency: float = 0.015
 
 @export_group("References")
-@export var player_node: CharacterBody2D 
+@export var player_node: CharacterBody2D
 @onready var base_layer: TileMapLayer = $ForegroundLayer
 @onready var wall_base_layer: TileMapLayer = get_node_or_null("BackgroundLayer")
+@onready var foliage_template: TileMapLayer = get_node_or_null("FoliageLayer")
+@export var background_music: AudioStreamMP3
+
 
 
 # Master data dictionary
 var world_data: Dictionary = {}
 var wall_data: Dictionary = {}
-var chunks: Dictionary = {} 
+var chunks: Dictionary = {}
 var wall_chunks: Dictionary = {}
+var foliage_chunks: Dictionary = {}
+
 
 var surface_noise: FastNoiseLite
 var cave_noise: FastNoiseLite
@@ -32,7 +37,7 @@ const MASK_MAP = {
 # --- Standard Cardinal Set ---
 	15: Vector2i(3, 4), 14: Vector2i(3, 3), 13: Vector2i(3, 5),
 	11: Vector2i(2, 4), 7:  Vector2i(4, 4), 10: Vector2i(2, 3),
-	6:  Vector2i(4, 3), 9:  Vector2i(2, 5), 5:  Vector2i(4, 5), 
+	6:  Vector2i(4, 3), 9:  Vector2i(2, 5), 5:  Vector2i(4, 5),
 	
 	# --- Cap/Line Set ---
 	0:  Vector2i(1, 6), # Isolated
@@ -55,14 +60,29 @@ const WALL_MASK_MAP = {
 	11: Vector2i(4, 2), 7:  Vector2i(2, 2), 10: Vector2i(2, 1),
 	6:  Vector2i(4, 1), 9:  Vector2i(2, 3), 5:  Vector2i(4, 3), 0: Vector2i(3, 2)
 }
+const FOLIAGE_MAP = {
+	1: Vector2i(1,2), # Purple Flower
+	2: Vector2i(2,2), # Grass Blade 1
+	3: Vector2i(3,2), # Sunflower
+	4: Vector2i(4,2), # Grass Blade 2
+	5: Vector2i(5,2), # Grass Blade 3
+	6: Vector2i(6,2), # Jasmine Flower
+}
 
 func _ready():
-	base_layer.hide() 
+	base_layer.hide()
 	if wall_base_layer: wall_base_layer.hide()
+	if foliage_template: foliage_template.hide()
+	
 	add_to_group("generator")
+	
 	_initialize_noise()
+	
 	generate_world()
+	
 	spawn_player()
+	
+	manage_music()
 
 func _initialize_noise():
 	randomize()
@@ -104,8 +124,26 @@ func generate_world():
 			if wall_data.has(pos):
 				var mask = _get_bitmask(pos, wall_data)
 				active_wall_chunk.set_cell(pos, 1, WALL_MASK_MAP.get(mask, Vector2i(3, 2)))
+	
+	# Foliage Pass 
+		var surf_y = surface_level + int(surface_noise.get_noise_1d(x) * surface_amplitude)
+
+		if foliage_template and world_data.has(Vector2i(x, surf_y)):
+			if randf() < 0.2: # 20% chance for foliage on surface
+				var foliage_atlas_pos = FOLIAGE_MAP[(randi() % FOLIAGE_MAP.size()) + 1]
+				var f_chunk = get_or_create_foliage_chunk(x)
 		
-		_update_shading_for_column(x, world_data)
+			# Determine if the tile should be flipped (50/50 chance)
+				var alternative_id = 0
+				if randf() < 0.5:
+	
+					alternative_id = TileSetAtlasSource.TRANSFORM_FLIP_H
+		
+				# Place the cell with the random flip applied
+				f_chunk.set_cell(Vector2i(x, surf_y - 1), 0, foliage_atlas_pos, alternative_id)
+		
+	
+		
 
 func update_tile_at(map_pos: Vector2i):
 	var chunk_id = floor(map_pos.x / float(chunk_width))
@@ -119,19 +157,29 @@ func update_tile_at(map_pos: Vector2i):
 	# This MUST use the logic that checks diagonals now
 	var mask = _get_bitmask(map_pos, world_data)
 	chunk.set_cell(map_pos, 0, MASK_MAP.get(mask, Vector2i(3, 4)))
-
-func _update_shading_for_column(x: int, data_set: Dictionary):
-	var found_y = -1
-	for y in range(map_height):
-		if data_set.has(Vector2i(x, y)):
-			found_y = y
-			break
 	
-	var c_id = floor(x / float(chunk_width))
-	if chunks.has(c_id) and chunks[c_id].has_method("apply_shading_at"):
-		chunks[c_id].apply_shading_at(x, found_y)
-	if wall_chunks.has(c_id) and wall_chunks[c_id].has_method("apply_shading_at"):
-		wall_chunks[c_id].apply_shading_at(x, found_y)
+# Converts a global X pixel position into the noise-based Y pixel height
+func get_surface_y_at_x(pixel_x: float) -> float:
+	# 1. Convert pixel position to tile coordinate
+	var tile_x = int(pixel_x / 16.0) # Assuming 16px tiles
+	
+	# 2. Re-run the noise formula used in generation
+	var surf_y_tile = surface_level + int(surface_noise.get_noise_1d(tile_x) * surface_amplitude)
+	
+	# 3. Convert back to pixels
+	return surf_y_tile * 16.0
+	
+
+func manage_music():
+	if background_music:
+		var music_player = AudioStreamPlayer.new()
+		add_child(music_player)
+		music_player.stream = background_music
+		music_player.play()
+	else:
+		push_error("Don't forget to drag MP3 into the Inspector!")
+
+
 
 func _is_cave(x, y, surf_y) -> bool:
 	var depth = y - surf_y
@@ -188,6 +236,18 @@ func get_or_create_wall_chunk(x_pos: int) -> TileMapLayer:
 	add_child(new_chunk)
 	wall_chunks[id] = new_chunk
 	return new_chunk
+
+func get_or_create_foliage_chunk(x_pos: int) -> TileMapLayer:
+	var id = floor(x_pos / float(chunk_width))
+	if foliage_chunks.has(id): return foliage_chunks[id]
+	var new_chunk = foliage_template.duplicate()
+	new_chunk.name = "FoliageChunk_" + str(id)
+	new_chunk.z_index = 5
+	new_chunk.show()
+	add_child(new_chunk)
+	foliage_chunks[id] = new_chunk
+	return new_chunk
+
 
 func spawn_player():
 	if !player_node: return
