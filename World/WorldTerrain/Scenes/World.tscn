@@ -2,11 +2,11 @@
 
 [ext_resource type="Script" uid="uid://by4yy80x4ga2p" path="res://World/WorldTerrain/Scripts/world.gd" id="1_qncns"]
 [ext_resource type="Shader" uid="uid://csncslrpxw7hy" path="res://World/Effects/Shaders/NightSky.gdshader" id="2_diavc"]
-[ext_resource type="AudioStream" uid="uid://v0g4fea1mhw3" path="res://assets/Sounds/Music/BaseMusic/Hollow_Light.mp3" id="2_qur2g"]
-[ext_resource type="TileSet" uid="uid://wn4mtjavttbh" path="res://assets/Environment/Tilesets/GrassBlock/MainTerrain.tres" id="3_qur2g"]
-[ext_resource type="Texture2D" uid="uid://bf7kdx6ygpcqi" path="res://assets/Environment/background1.png" id="5_ubbky"]
-[ext_resource type="Texture2D" uid="uid://8eqssa8uswqr" path="res://assets/Environment/background2.png" id="6_nnetf"]
-[ext_resource type="Texture2D" uid="uid://dk8vkx0l6ems4" path="res://assets/Environment/background3.png" id="7_s8apy"]
+[ext_resource type="AudioStream" uid="uid://v0g4fea1mhw3" path="res://GD-log/assets/Sounds/Music/BaseMusic/Hollow_Light.mp3" id="2_qur2g"]
+[ext_resource type="TileSet" uid="uid://wn4mtjavttbh" path="res://GD-log/assets/Environment/Tilesets/GrassBlock/MainTerrain.tres" id="3_qur2g"]
+[ext_resource type="Texture2D" uid="uid://bf7kdx6ygpcqi" path="res://GD-log/assets/Environment/background1.png" id="5_ubbky"]
+[ext_resource type="Texture2D" uid="uid://8eqssa8uswqr" path="res://GD-log/assets/Environment/background2.png" id="6_nnetf"]
+[ext_resource type="Texture2D" uid="uid://dk8vkx0l6ems4" path="res://GD-log/assets/Environment/background3.png" id="7_s8apy"]
 [ext_resource type="PackedScene" uid="uid://cfxueluo5j5ap" path="res://Player/Logic/PlayerFrameworks/Scenes/player.tscn" id="9_jvuqk"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qur2g"]
@@ -30,13 +30,14 @@ ambient_light_source = 2
 ambient_light_color = Color(0.6637184, 0.5182143, 0.16247293, 1)
 ambient_light_energy = 6.44
 reflected_light_source = 2
-tonemap_mode = 3
-ssao_enabled = true
+tonemap_mode = 4
+tonemap_agx_contrast = 1.37
 glow_enabled = true
 glow_levels/4 = 9.24
 glow_levels/5 = 8.37
-glow_normalized = true
-glow_intensity = 0.5
+glow_intensity = 2.23
+glow_mix = 0.091
+glow_bloom = 0.13
 glow_blend_mode = 2
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_eu7l1"]

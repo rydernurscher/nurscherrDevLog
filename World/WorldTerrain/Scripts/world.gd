@@ -2,6 +2,7 @@
 extends Node2D
 class_name WorldGenerator
 
+
 @export_group("World Size")
 @export var map_width: int = 1200
 @export var map_height: int = 500
@@ -11,6 +12,7 @@ class_name WorldGenerator
 @export var surface_level: int = 60
 @export var surface_amplitude: int = 15
 @export var surface_frequency: float = 0.015
+@export var lamp_spacing: int = 25 # How many tiles between lamps
 
 @export_group("References")
 @export var player_node: CharacterBody2D
@@ -27,6 +29,9 @@ var wall_data: Dictionary = {}
 var chunks: Dictionary = {}
 var wall_chunks: Dictionary = {}
 var foliage_chunks: Dictionary = {}
+var lightPosts: PackedScene = preload( "res://World/Structures/Scenes/lampPost1.tscn",
+
+)
 
 
 var surface_noise: FastNoiseLite
@@ -94,6 +99,7 @@ func _initialize_noise():
 	cave_noise.seed = s + 1
 	cave_noise.frequency = 0.04
 
+
 func generate_world():
 	for c in chunks.values(): c.queue_free()
 	for c in wall_chunks.values(): c.queue_free()
@@ -116,6 +122,8 @@ func generate_world():
 		var active_chunk = get_or_create_chunk(x)
 		var active_wall_chunk = get_or_create_wall_chunk(x)
 		
+		
+		
 		for y in range(map_height):
 			var pos = Vector2i(x, y)
 			if world_data.has(pos):
@@ -127,24 +135,54 @@ func generate_world():
 	
 	# Foliage Pass 
 		var surf_y = surface_level + int(surface_noise.get_noise_1d(x) * surface_amplitude)
+		var surf_pos = Vector2i(x, surf_y)
+		
+		var tile_data = active_chunk.get_cell_tile_data(surf_pos)
+		var can_grow = false
+		if tile_data:
+			can_grow = tile_data.get_custom_data("can_grow_foliage")
 
-		if foliage_template and world_data.has(Vector2i(x, surf_y)):
-			if randf() < 0.2: # 20% chance for foliage on surface
+		if foliage_template and can_grow:
+			if randf() < 0.2:
 				var foliage_atlas_pos = FOLIAGE_MAP[(randi() % FOLIAGE_MAP.size()) + 1]
 				var f_chunk = get_or_create_foliage_chunk(x)
-		
-			# Determine if the tile should be flipped (50/50 chance)
-				var alternative_id = 0
-				if randf() < 0.5:
-	
-					alternative_id = TileSetAtlasSource.TRANSFORM_FLIP_H
-		
-				# Place the cell with the random flip applied
-				f_chunk.set_cell(Vector2i(x, surf_y - 1), 0, foliage_atlas_pos, alternative_id)
+				var alt_id = TileSetAtlasSource.TRANSFORM_FLIP_H if randf() < 0.5 else 0
+				f_chunk.set_cell(Vector2i(x, surf_y - 1), 0, foliage_atlas_pos, alt_id)
 		
 	
-		
+		if x % lamp_spacing == 0 and can_grow:
+			spawn_lamp_post(Vector2i(x, surf_y))
+	
 
+func _process(_delta):
+	if !player_node: return
+	
+	var player_chunk_id = floor(player_node.global_position.x / (chunk_width * 16))
+	
+	# Only show chunks within 2 chunks of the player
+	for id in chunks.keys():
+		var is_visible = abs(id - player_chunk_id) <= 2
+		chunks[id].visible = is_visible
+		if wall_chunks.has(id): wall_chunks[id].visible = is_visible
+		if foliage_chunks.has(id): foliage_chunks[id].visible = is_visible
+		
+func spawn_lamp_post(grid_pos: Vector2i):
+	
+	if not lightPosts: return
+	
+	var lamp = lightPosts.instantiate()
+	
+			# Convert grid coordinates to world pixels
+			# Assuming 16px tiles; adjust if your tiles are 8 or 32!
+	var world_pos = Vector2(grid_pos.x * 16, grid_pos.y * 16)
+	
+			# Add it to the scene
+	add_child(lamp)
+	lamp.position = world_pos
+	
+			# Optional: Slight offset so the post sits "in" the ground properly
+	lamp.position.y -= 48
+			
 func update_tile_at(map_pos: Vector2i):
 	var chunk_id = floor(map_pos.x / float(chunk_width))
 	if !chunks.has(chunk_id): return
@@ -170,15 +208,32 @@ func get_surface_y_at_x(pixel_x: float) -> float:
 	return surf_y_tile * 16.0
 	
 
+	
+
 func manage_music():
 	if background_music:
 		var music_player = AudioStreamPlayer.new()
 		add_child(music_player)
 		music_player.stream = background_music
+		music_player.volume_db = -15.0
 		music_player.play()
 	else:
 		push_error("Don't forget to drag MP3 into the Inspector!")
 
+func _can_place_on_tile(pos: Vector2i) -> bool:
+	# 1. Get the tile's atlas coordinates from the base layer
+	var atlas_coords = base_layer.get_cell_atlas_coords(pos)
+	
+	# 2. If the cell is empty (-1, -1), we obviously can't grow anything
+	if atlas_coords == Vector2i(-1, -1): return false
+	
+	# 3. Get the TileData object for that specific tile in the TileSet
+	var tile_data = base_layer.tile_set.get_source(0).get_tile_data(atlas_coords, 0)
+	
+	if tile_data:
+		# 4. Return the boolean value from your Custom Data Layer
+		return tile_data.get_custom_data("can_grow_foliage")
+	return false
 
 
 func _is_cave(x, y, surf_y) -> bool:

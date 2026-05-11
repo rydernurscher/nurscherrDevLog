@@ -1,22 +1,25 @@
-[gd_scene format=3 uid="uid://cnxvjarcr1044"]
+[gd_scene format=3 uid="uid://hswdokpuefbt"]
 
 [ext_resource type="Texture2D" uid="uid://2ny6enm2ck55" path="res://assets/Environment/Tilesets/LightingObjects/Lightpost1.png" id="1_arrve"]
 
 [sub_resource type="Gradient" id="Gradient_2l6km"]
-colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 0)
+interpolation_mode = 2
+interpolation_color_space = 1
+offsets = PackedFloat32Array(0, 0.48192772)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_t3e1u"]
 gradient = SubResource("Gradient_2l6km")
-width = 120
-height = 120
+width = 512
+height = 256
 use_hdr = true
 fill = 1
 fill_from = Vector2(0.37391305, 0.4869565)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_i5enm"]
 gradient = SubResource("Gradient_2l6km")
-width = 120
-height = 120
+width = 512
+height = 256
 use_hdr = true
 fill = 1
 fill_from = Vector2(0.66086954, 0.6)
@@ -27,11 +30,15 @@ fill_from = Vector2(0.66086954, 0.6)
 texture = ExtResource("1_arrve")
 
 [node name="PointLight2D" type="PointLight2D" parent="." unique_id=839267442]
-shadow_enabled = true
+color = Color(0.99966854, 0.9972593, 7.70092e-07, 1)
+energy = 1.9
 shadow_filter = 2
+shadow_filter_smooth = 55.1
 texture = SubResource("GradientTexture2D_t3e1u")
 
 [node name="PointLight2D2" type="PointLight2D" parent="." unique_id=1407075837]
-shadow_enabled = true
+color = Color(1, 0.99607843, 0, 1)
+energy = 1.9
 shadow_filter = 2
+shadow_filter_smooth = 8.9
 texture = SubResource("GradientTexture2D_i5enm")
