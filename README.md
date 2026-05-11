@@ -48,6 +48,12 @@ The project is currently in the **Technical Foundation** phase.
 *   [ ] Enemy AI and Boss encounter framework (Planned).
 
 ## 🎮 How to Run
+1. Click latest release in 'releases' tab
+2. Download the 'example'.exe file
+3. Play
+
+   OR
+   
 1.  Clone this repository.
 2.  Open the project in **Godot 4.4+**.
 3.  Ensure the rendering backend is set to **Forward+** to support the post-processing shaders.
