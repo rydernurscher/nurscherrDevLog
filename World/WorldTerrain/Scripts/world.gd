@@ -33,6 +33,7 @@ var lightPosts: PackedScene = preload( "res://World/Structures/Scenes/lampPost1.
 
 )
 
+const MINING_THRESHOLD_DEPTH = 160
 
 var surface_noise: FastNoiseLite
 var cave_noise: FastNoiseLite
@@ -58,6 +59,34 @@ const MASK_MAP = {
 	101: Vector2i(5, 4), # Inner Top-Right
 	102: Vector2i(6, 3), # Inner Bottom-Left
 	103: Vector2i(5, 3)  # Inner Bottom-Right
+}
+
+const STONE_BRICK_MASK_MAP = {
+# --- Standard Cardinal Set ---
+	15: Vector2i(2, 2), # Centre
+	14: Vector2i(2, 1), # Top-middle
+	13: Vector2i(2, 3), # Bottom-middle
+	11: Vector2i(1, 2), # Middle-left
+	7:  Vector2i(3, 2), # Middle-right
+	10: Vector2i(1, 1), # Top-left
+	6:  Vector2i(3, 1), # Top-right
+	9:  Vector2i(1, 3), # Bottom-left
+	5:  Vector2i(3, 3), # Bottom-right
+	
+	# --- Cap/Line Set ---
+	0:  Vector2i(0, 4), # Isolated
+	3:  Vector2i(0, 2), # Vertical Line
+	12: Vector2i(2, 4), # Horizontal Line
+	1:  Vector2i(0, 3), # Bottom Cap
+	2:  Vector2i(0, 1), # Top Cap
+	4:  Vector2i(3, 4), # Right Cap
+	8:  Vector2i(1, 4), # Left Cap
+	
+	# --- Inner Corners (The "Grace" connections) ---
+	100: Vector2i(5, 2), # Inner Top-Left
+	101: Vector2i(4, 2), # Inner Top-Right
+	102: Vector2i(5, 1), # Inner Bottom-Left
+	103: Vector2i(4, 1)  # Inner Bottom-Right
 }
 
 const WALL_MASK_MAP = {
@@ -87,7 +116,7 @@ func _ready():
 	
 	spawn_player()
 	
-	manage_music()
+	manage_music() # Function for playing music, only plays one set song as of now.
 
 func _initialize_noise():
 	randomize()
@@ -97,7 +126,7 @@ func _initialize_noise():
 	surface_noise.frequency = surface_frequency
 	cave_noise = FastNoiseLite.new()
 	cave_noise.seed = s + 1
-	cave_noise.frequency = 0.04
+	cave_noise.frequency = 0.033
 
 
 func generate_world():
@@ -123,12 +152,27 @@ func generate_world():
 		var active_wall_chunk = get_or_create_wall_chunk(x)
 		
 		
+		var surf_y_tile = surface_level + int(surface_noise.get_noise_1d(x) * surface_amplitude)
 		
 		for y in range(map_height):
 			var pos = Vector2i(x, y)
+			
 			if world_data.has(pos):
+				var tile_depth = y - surf_y_tile
 				var mask = _get_bitmask(pos, world_data)
-				active_chunk.set_cell(pos, 0, MASK_MAP.get(mask, Vector2i(3, 4)))
+				if tile_depth <= 3:
+					# Randomly decide between Stone Brick and Grass
+					# 20% chance for Stone Brick, but ONLY at surface level
+					if randf() < 0.8:
+						active_chunk.set_cell(pos, 2, STONE_BRICK_MASK_MAP.get(mask, Vector2i(2, 2)))
+					else:
+						# Default Grass/Dirt for surface
+						active_chunk.set_cell(pos, 0, MASK_MAP.get(mask, Vector2i(3, 4)))
+			
+			# --- UNDERGROUND LOGIC (Deeper than 3 blocks) ---
+				else:
+					# Force normal Dirt/Stone for underground (No Stone Bricks here)
+					active_chunk.set_cell(pos, 0, MASK_MAP.get(mask, Vector2i(3, 4)))
 			if wall_data.has(pos):
 				var mask = _get_bitmask(pos, wall_data)
 				active_wall_chunk.set_cell(pos, 1, WALL_MASK_MAP.get(mask, Vector2i(3, 2)))
@@ -207,7 +251,20 @@ func get_surface_y_at_x(pixel_x: float) -> float:
 	# 3. Convert back to pixels
 	return surf_y_tile * 16.0
 	
-
+func can_player_mine_at(target_position: Vector2) -> bool:
+	# 1. Get the surface height at this specific X coordinate
+	var surface_y = get_surface_y_at_x(target_position.x)
+	
+	# 2. Calculate the distance between the target block and the surface
+	# In Godot, Y increases as you go down.
+	var depth_below_surface = target_position.y - surface_y
+	
+	# 3. Check if the block is deep enough
+	if depth_below_surface >= MINING_THRESHOLD_DEPTH:
+		return true # Player is deep enough to break blocks
+	else:
+		# Optional: Trigger a "clink" sound or sparks to show it's unbreakable
+		return false
 	
 
 func manage_music():

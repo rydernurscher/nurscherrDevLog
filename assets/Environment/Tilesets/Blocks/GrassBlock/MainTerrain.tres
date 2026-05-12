@@ -1,7 +1,8 @@
 [gd_resource type="TileSet" format=3 uid="uid://wn4mtjavttbh"]
 
-[ext_resource type="Texture2D" uid="uid://de21ghuxbffhg" path="res://GD-log/assets/Environment/Tilesets/GrassBlock/GroundTileset.png" id="1_sjlqp"]
-[ext_resource type="Texture2D" uid="uid://dfij1ydh00jll" path="res://GD-log/assets/Environment/Tilesets/Walls/DirtWall/DirtWallTileset.png" id="2_j5lwo"]
+[ext_resource type="Texture2D" uid="uid://de21ghuxbffhg" path="res://assets/Environment/Tilesets/Blocks/GrassBlock/GroundTileset.png" id="1_sjlqp"]
+[ext_resource type="Texture2D" uid="uid://dfij1ydh00jll" path="res://assets/Environment/Tilesets/Walls/DirtWall/DirtWallTileset.png" id="2_j5lwo"]
+[ext_resource type="Texture2D" uid="uid://kghlo51uv6g8" path="res://assets/Environment/Tilesets/Blocks/StoneBrickBlock/StoneBrickBlock.png" id="3_sgavg"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_j5lwo"]
 texture = ExtResource("1_sjlqp")
@@ -150,6 +151,50 @@ texture = ExtResource("2_j5lwo")
 3:3/0 = 0
 4:3/0 = 0
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_st37m"]
+texture = ExtResource("3_sgavg")
+0:1/0 = 0
+0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:1/0 = 0
+1:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:1/0 = 0
+2:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:1/0/custom_data_0 = true
+3:1/0 = 0
+3:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+4:1/0 = 0
+4:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+5:1/0 = 0
+5:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+0:2/0 = 0
+0:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:2/0 = 0
+1:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:2/0 = 0
+2:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+3:2/0 = 0
+3:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+4:2/0 = 0
+4:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+5:2/0 = 0
+5:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+0:3/0 = 0
+0:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:3/0 = 0
+1:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:3/0 = 0
+2:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+3:3/0 = 0
+3:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+0:4/0 = 0
+0:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:4/0 = 0
+1:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:4/0 = 0
+2:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+3:4/0 = 0
+3:4/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+
 [resource]
 uv_clipping = true
 occlusion_layer_0/light_mask = 1
@@ -161,6 +206,7 @@ custom_data_layer_0/name = "can_grow_foliage"
 custom_data_layer_0/type = 1
 sources/0 = SubResource("TileSetAtlasSource_j5lwo")
 sources/1 = SubResource("TileSetAtlasSource_yn15i")
+sources/2 = SubResource("TileSetAtlasSource_st37m")
 metadata/_better_terrain = {
 &"decoration": ["Decoration", Color(0.4117647, 0.4117647, 0.4117647, 1), 3, [], {
 &"path": "res://addons/better-terrain/icons/Decoration.svg"

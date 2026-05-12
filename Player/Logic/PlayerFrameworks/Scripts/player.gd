@@ -1,5 +1,4 @@
 extends CharacterBody2D
-class_name Player
 
 # --- SIGNALS ---
 signal health_changed(new_health)
@@ -44,6 +43,7 @@ var roll_timer: float = 0.0
 var attack_timer: float = 0.0
 var stun_timer: float = 0.0
 var facing_direction: int = 1
+
 
 @onready var sprite = $AnimatedSprite2D
 @onready var wings = $AnimatedSprite2D/Wings if has_node("AnimatedSprite2D/Wings") else null
@@ -145,11 +145,20 @@ func _input(event):
 			mana_changed.emit(current_mana)
 
 # --- MECHANICS ---
+# The depth (in pixels) below the surface where mining becomes possible.
+# Example: 10 tiles * 16 pixels = 160.0
+
+
+		
 func _handle_mining():
 	if !generator: return
 	
+	
 	var m_pos = get_global_mouse_position()
-	if global_position.distance_to(m_pos) > 80.0: return
+	if global_position.distance_to(m_pos) > 32.0: return
+	
+	if !generator.can_player_mine_at(m_pos):
+		return
 	
 	# Use the generator's base layer to find the map coordinate
 	var map_pos = generator.base_layer.local_to_map(m_pos)
