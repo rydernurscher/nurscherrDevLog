@@ -37,13 +37,46 @@ const MINING_THRESHOLD_DEPTH = 160
 
 var surface_noise: FastNoiseLite
 var cave_noise: FastNoiseLite
+var ruin_noise = FastNoiseLite
+var biome_noise = FastNoiseLite
+
+# BIOMES
+enum BiomeType { FOREST, RUINS, CRIMSON }
+
+# Define blocks and styles per biome
+const BIOME_SETTINGS = {
+	BiomeType.FOREST: {
+		"main_block": 0, # Grass/Dirt source ID
+		"brick_chance": 0.05,
+		"foliage_density": 0.8,
+		"bg_wall": Vector2i(3, 2)
+	},
+	BiomeType.RUINS: {
+		"main_block": 2, # Stone Brick source ID
+		"brick_chance": 0.6,
+		"foliage_density": 0.3,
+		"bg_wall": Vector2i(2, 1)
+	},
+	BiomeType.CRIMSON: {
+		"main_block": 0, # Red Grass
+		"brick_chance": 0.0,
+		"foliage_density": 0.5,
+		"bg_wall": Vector2i(4, 2)
+	}
+}
 
 # Mapping for 0-15 bitmask
 const MASK_MAP = {
 # --- Standard Cardinal Set ---
-	15: Vector2i(3, 4), 14: Vector2i(3, 3), 13: Vector2i(3, 5),
-	11: Vector2i(2, 4), 7:  Vector2i(4, 4), 10: Vector2i(2, 3),
-	6:  Vector2i(4, 3), 9:  Vector2i(2, 5), 5:  Vector2i(4, 5),
+	15: Vector2i(3, 4), 
+	14: Vector2i(3, 3), 
+	13: Vector2i(3, 5),
+	11: Vector2i(2, 4), 
+	7:  Vector2i(4, 4), 
+	10: Vector2i(2, 3),
+	6:  Vector2i(4, 3), 
+	9:  Vector2i(2, 5), 
+	5:  Vector2i(4, 5),
 	
 	# --- Cap/Line Set ---
 	0:  Vector2i(1, 6), # Isolated
@@ -90,17 +123,29 @@ const STONE_BRICK_MASK_MAP = {
 }
 
 const WALL_MASK_MAP = {
-	15: Vector2i(3, 2), 14: Vector2i(3, 1), 13: Vector2i(3, 3),
-	11: Vector2i(4, 2), 7:  Vector2i(2, 2), 10: Vector2i(2, 1),
-	6:  Vector2i(4, 1), 9:  Vector2i(2, 3), 5:  Vector2i(4, 3), 0: Vector2i(3, 2)
+	15: Vector2i(3, 2), 
+	14: Vector2i(3, 1), 
+	13: Vector2i(3, 3),
+	11: Vector2i(4, 2), 
+	7:  Vector2i(2, 2), 
+	10: Vector2i(2, 1),
+	6:  Vector2i(4, 1), 
+	9:  Vector2i(2, 3), 
+	5:  Vector2i(4, 3), 
+	0: Vector2i(3, 2) # UNUSED ATM
 }
 const FOLIAGE_MAP = {
+	
 	1: Vector2i(1,2), # Purple Flower
 	2: Vector2i(2,2), # Grass Blade 1
 	3: Vector2i(3,2), # Sunflower
 	4: Vector2i(4,2), # Grass Blade 2
 	5: Vector2i(5,2), # Grass Blade 3
 	6: Vector2i(6,2), # Jasmine Flower
+	7: Vector2i(7,2), # Jasmine Flower
+	8: Vector2i(8,2), # Jasmine Flower
+	9: Vector2i(0,2), # Fluffy Grass
+
 }
 
 func _ready():
@@ -124,9 +169,29 @@ func _initialize_noise():
 	surface_noise = FastNoiseLite.new()
 	surface_noise.seed = s
 	surface_noise.frequency = surface_frequency
+	
 	cave_noise = FastNoiseLite.new()
 	cave_noise.seed = s + 1
 	cave_noise.frequency = 0.033
+	
+	ruin_noise = FastNoiseLite.new()
+	ruin_noise.seed = randi()
+	ruin_noise.frequency = 0.0091
+	
+	biome_noise = FastNoiseLite.new()
+	biome_noise.seed = randi()
+	biome_noise.frequency = 0.005 # Low frequency = Large biomes
+	
+
+func get_biome_at(x: int) -> BiomeType:
+	var val = biome_noise.get_noise_1d(x)
+	
+	if val < -0.2:
+		return BiomeType.CRIMSON
+	elif val < 0.2:
+		return BiomeType.FOREST
+	else:
+		return BiomeType.RUINS
 
 
 func generate_world():
@@ -151,28 +216,33 @@ func generate_world():
 		var active_chunk = get_or_create_chunk(x)
 		var active_wall_chunk = get_or_create_wall_chunk(x)
 		
+		# Determine Biome for this column
+		var current_biome = get_biome_at(x)
+		var settings = BIOME_SETTINGS[current_biome]
+		
 		
 		var surf_y_tile = surface_level + int(surface_noise.get_noise_1d(x) * surface_amplitude)
 		
 		for y in range(map_height):
 			var pos = Vector2i(x, y)
 			
+			
 			if world_data.has(pos):
 				var tile_depth = y - surf_y_tile
 				var mask = _get_bitmask(pos, world_data)
-				if tile_depth <= 3:
-					# Randomly decide between Stone Brick and Grass
-					# 20% chance for Stone Brick, but ONLY at surface level
-					if randf() < 0.8:
-						active_chunk.set_cell(pos, 2, STONE_BRICK_MASK_MAP.get(mask, Vector2i(2, 2)))
-					else:
-						# Default Grass/Dirt for surface
-						active_chunk.set_cell(pos, 0, MASK_MAP.get(mask, Vector2i(3, 4)))
+				
+				# --- CLUSTER LOGIC ---
+					# Get noise value for this specific tile (-1.0 to 1.0)
+				var brick_value = ruin_noise.get_noise_2d(x, y)
 			
-			# --- UNDERGROUND LOGIC (Deeper than 3 blocks) ---
+				if tile_depth <= 4 and brick_value > 0.1:
+					active_chunk.set_cell(pos, 2, STONE_BRICK_MASK_MAP.get(mask, Vector2i(2, 2)))
 				else:
-					# Force normal Dirt/Stone for underground (No Stone Bricks here)
+				# Normal Dirt/Grass
 					active_chunk.set_cell(pos, 0, MASK_MAP.get(mask, Vector2i(3, 4)))
+			
+		
+				
 			if wall_data.has(pos):
 				var mask = _get_bitmask(pos, wall_data)
 				active_wall_chunk.set_cell(pos, 1, WALL_MASK_MAP.get(mask, Vector2i(3, 2)))
@@ -187,7 +257,7 @@ func generate_world():
 			can_grow = tile_data.get_custom_data("can_grow_foliage")
 
 		if foliage_template and can_grow:
-			if randf() < 0.2:
+			if randf() < 0.8:
 				var foliage_atlas_pos = FOLIAGE_MAP[(randi() % FOLIAGE_MAP.size()) + 1]
 				var f_chunk = get_or_create_foliage_chunk(x)
 				var alt_id = TileSetAtlasSource.TRANSFORM_FLIP_H if randf() < 0.5 else 0

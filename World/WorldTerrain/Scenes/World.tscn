@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://drv5nrbnuw8ni"]
+[gd_scene format=4 uid="uid://drv5nrbnuw8ni"]
 
 [ext_resource type="Script" uid="uid://by4yy80x4ga2p" path="res://World/WorldTerrain/Scripts/world.gd" id="1_qncns"]
 [ext_resource type="Shader" uid="uid://csncslrpxw7hy" path="res://World/Effects/Shaders/NightSky.gdshader" id="2_diavc"]
@@ -46,8 +46,9 @@ glow_blend_mode = 2
 
 [node name="WorldGenerator" type="Node2D" unique_id=288371783 node_paths=PackedStringArray("player_node")]
 script = ExtResource("1_qncns")
-map_width = 1600
-map_height = 300
+map_width = 500
+surface_amplitude = 6
+surface_frequency = 0.008
 player_node = NodePath("Player/Player")
 background_music = ExtResource("2_qur2g")
 
@@ -99,6 +100,7 @@ collision_enabled = false
 [node name="ForegroundLayer" type="TileMapLayer" parent="." unique_id=1110115016 groups=["terrain"]]
 z_index = 4
 z_as_relative = false
+tile_map_data = PackedByteArray("AAAzAQ4BAAAEAAMAAAAyAQ4BAAADAAMAAAAxAQ4BAAABAAMAAAAxAQ8BAAACAAUAAAAyAQ8BAAADAAUAAAAzAQ8BAAABAAUAAAA=")
 tile_set = ExtResource("7_diavc")
 collision_visibility_mode = 2
 
@@ -110,7 +112,7 @@ collision_visibility_mode = 2
 
 [node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=1594210492]
 z_index = -1000
-color = Color(0.07410676, 5.7756904e-07, 0.55129004, 0.9019608)
+color = Color(0.014423589, 1.2032688e-08, 0.23656285, 0.9019608)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1113306821]
 environment = SubResource("Environment_js7pq")

@@ -44,6 +44,8 @@ var attack_timer: float = 0.0
 var stun_timer: float = 0.0
 var facing_direction: int = 1
 
+var damage_tween: Tween
+
 
 @onready var sprite = $AnimatedSprite2D
 @onready var wings = $AnimatedSprite2D/Wings if has_node("AnimatedSprite2D/Wings") else null
@@ -205,10 +207,16 @@ func take_damage(amount: float):
 	current_health = clamp(current_health - amount, 0, max_health)
 	health_changed.emit(current_health)
 	
-	# Flash sprite red
-	var tw = create_tween()
+	# 1. Kill the previous tween if it's still running
+	if damage_tween and damage_tween.is_running():
+		damage_tween.kill()
+	
+	# 2. Reset color immediately (prevents the "no flash" glitch)
 	sprite.modulate = Color(5, 0, 0)
-	tw.tween_property(sprite, "modulate", Color.WHITE, 0.6)
+	
+	# 3. Create and store the new tween
+	damage_tween = create_tween()
+	damage_tween.tween_property(sprite, "modulate", Color.WHITE, 0.6)
 	
 	if current_health <= 0: die()
 
