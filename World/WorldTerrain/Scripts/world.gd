@@ -14,6 +14,20 @@ class_name WorldGenerator
 @export var surface_frequency: float = 0.015
 @export var lamp_spacing: int = 25 # How many tiles between lamps
 
+# Structures Dictionary
+@export var structures: Dictionary = {
+	"spawnStructure": {
+		"scene": preload("res://World/Structures/Scenes/SpawnStructure.tscn"),
+		"limit": 1,
+		"chance": 1.0,
+	},
+	
+	# ---
+	
+	# ---
+}
+
+
 @export_group("References")
 @export var player_node: CharacterBody2D
 @onready var base_layer: TileMapLayer = $ForegroundLayer
@@ -159,6 +173,10 @@ func _ready():
 	
 	generate_world()
 	
+	var mid_x = map_width / 2
+	var mid_y = surface_level + int(surface_noise.get_noise_1d(mid_x) * surface_amplitude)
+	spawn_named_structure("spawnStructure", Vector2i(mid_x, mid_y), 25) # 9 tiles wide flat area
+	
 	spawn_player()
 	
 	manage_music() # Function for playing music, only plays one set song as of now.
@@ -176,7 +194,7 @@ func _initialize_noise():
 	
 	ruin_noise = FastNoiseLite.new()
 	ruin_noise.seed = randi()
-	ruin_noise.frequency = 0.0091
+	ruin_noise.frequency = 0.0078
 	
 	biome_noise = FastNoiseLite.new()
 	biome_noise.seed = randi()
@@ -259,9 +277,17 @@ func generate_world():
 		if foliage_template and can_grow:
 			if randf() < 0.8:
 				var foliage_atlas_pos = FOLIAGE_MAP[(randi() % FOLIAGE_MAP.size()) + 1]
+				var source_id = 0
+				if randf() < 0.05: # 10% chance
+					source_id = 5
+					if source_id == 5:
+						foliage_atlas_pos = Vector2i(0,0)
+						
+
+							
 				var f_chunk = get_or_create_foliage_chunk(x)
 				var alt_id = TileSetAtlasSource.TRANSFORM_FLIP_H if randf() < 0.5 else 0
-				f_chunk.set_cell(Vector2i(x, surf_y - 1), 0, foliage_atlas_pos, alt_id)
+				f_chunk.set_cell(Vector2i(x, surf_y - 1), source_id, foliage_atlas_pos, alt_id)
 		
 	
 		if x % lamp_spacing == 0 and can_grow:
@@ -346,6 +372,54 @@ func manage_music():
 		music_player.play()
 	else:
 		push_error("Don't forget to drag MP3 into the Inspector!")
+		
+func spawn_named_structure(structure_key: String, tile_pos: Vector2i, flat_width: int = 7):
+	if not structures.has(structure_key):
+		push_error("Structure key not found: " + structure_key)
+		return
+
+	var data = structures[structure_key]
+	var scene = data["scene"]
+	
+	if scene:
+		# 1. Bulldoze the area in the data
+		var start_x = tile_pos.x - (flat_width / 2)
+		var target_y = tile_pos.y
+		
+		for x in range(start_x, start_x + flat_width):
+			# Clear air above
+			for y in range(target_y - 15, target_y):
+				world_data.erase(Vector2i(x, y))
+			# Fill solid ground below (foundation)
+			for y in range(target_y, target_y + 6):
+				world_data[Vector2i(x, y)] = true
+		
+		# 2. Instantiate the building
+		var instance = scene.instantiate()
+		add_child(instance)
+		instance.global_position = base_layer.map_to_local(tile_pos)
+		
+		# 3. Force visual update for the "Bulldozed" area
+		# We go slightly wider/taller than the flat area to fix bitmasks
+		_update_visuals_for_area(start_x - 2, target_y - 16, flat_width + 4, 25)
+		
+		print("Spawned ", structure_key, " at ", tile_pos)
+		
+func _update_visuals_for_area(x_start: int, y_start: int, w: int, h: int):
+	for x in range(x_start, x_start + w):
+		# Important: Get the correct chunk for this X coordinate
+		var active_chunk = get_or_create_chunk(x)
+		if not active_chunk: continue
+		
+		for y in range(y_start, y_start + h):
+			var pos = Vector2i(x, y)
+			if world_data.has(pos):
+				var mask = _get_bitmask(pos, world_data)
+				# Use your MASK_MAP to redraw the tile correctly
+				active_chunk.set_cell(pos, 0, MASK_MAP.get(mask, Vector2i(3, 4)))
+			else:
+				# If it's no longer in world_data, delete the tile
+				active_chunk.set_cell(pos, -1)
 
 func _can_place_on_tile(pos: Vector2i) -> bool:
 	# 1. Get the tile's atlas coordinates from the base layer

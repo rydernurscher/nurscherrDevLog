@@ -1,7 +1,80 @@
-[gd_scene format=4 uid="uid://632a78dfqfpx"]
+[gd_scene format=3 uid="uid://632a78dfqfpx"]
 
-[ext_resource type="TileSet" uid="uid://wn4mtjavttbh" path="res://assets/Environment/Tilesets/Blocks/GrassBlock/MainTerrain.tres" id="1_w2k76"]
+[ext_resource type="Texture2D" uid="uid://brggpc0ufhm70" path="res://assets/Environment/Structures/StartStructure.png" id="1_gb1jp"]
+[ext_resource type="Texture2D" uid="uid://culpsxn2m2rd6" path="res://assets/Environment/Structures/Lights/TorchUnlit1.png" id="2_5kh0y"]
+[ext_resource type="Shader" uid="uid://cajjtty733sou" path="res://World/Effects/Shaders/FoliageSway.gdshader" id="3_5kh0y"]
+[ext_resource type="Texture2D" uid="uid://bfht254mxrlh3" path="res://assets/Environment/Structures/Lights/TorchLit1.png" id="3_b07tl"]
 
-[node name="Structure" type="TileMapLayer" unique_id=1202520490]
-tile_map_data = PackedByteArray("AADu/wkAAgABAAEAAADu/wgAAgACAAIAAADu/wcAAgACAAIAAADu/wYAAgACAAIAAADu/wUAAgACAAIAAADu/wQAAgACAAIAAADu/wMAAgABAAMAAADt/wkAAgACAAIAAADt/wgAAgACAAIAAADt/wcAAgACAAIAAADt/wYAAgACAAIAAADt/wUAAgACAAIAAADt/wQAAgACAAIAAADt/wMAAgACAAIAAADs/wkAAgACAAIAAADs/wgAAgACAAIAAADs/wcAAgACAAIAAADs/wYAAgACAAIAAADs/wUAAgACAAIAAADs/wQAAgACAAIAAADs/wMAAgACAAIAAADr/wkAAgACAAIAAADr/wgAAgACAAIAAADr/wcAAgACAAIAAADr/wYAAgACAAIAAADr/wUAAgACAAIAAADr/wQAAgACAAIAAADr/wMAAgACAAIAAADq/wkAAgACAAIAAADq/wgAAgACAAIAAADq/wcAAgACAAIAAADq/wYAAgACAAIAAADq/wUAAgACAAIAAADq/wQAAgACAAIAAADq/wMAAgACAAIAAADp/wkAAgACAAIAAADp/wgAAgACAAIAAADp/wcAAgACAAIAAADp/wYAAgACAAIAAADp/wUAAgACAAIAAADp/wQAAgACAAIAAADp/wMAAgACAAIAAADo/wkAAgADAAEAAADo/wgAAgACAAIAAADo/wcAAgACAAIAAADo/wYAAgACAAIAAADo/wUAAgACAAIAAADo/wQAAgACAAIAAADo/wMAAgADAAMAAAD7/wkAAgADAAMAAAD7/wgAAgACAAIAAAD7/wcAAgACAAIAAAD7/wYAAgACAAIAAAD7/wUAAgACAAIAAAD7/wQAAgADAAEAAAD6/wkAAgACAAIAAAD6/wgAAgACAAIAAAD6/wcAAgACAAIAAAD6/wYAAgACAAIAAAD6/wUAAgACAAIAAAD6/wQAAgACAAIAAAD5/wkAAgACAAIAAAD5/wgAAgACAAIAAAD5/wcAAgACAAIAAAD5/wYAAgACAAIAAAD5/wUAAgACAAIAAAD5/wQAAgACAAIAAAD4/wkAAgACAAIAAAD4/wgAAgACAAIAAAD4/wcAAgACAAIAAAD4/wYAAgACAAIAAAD4/wUAAgACAAIAAAD4/wQAAgACAAIAAAD3/wkAAgACAAIAAAD3/wgAAgACAAIAAAD3/wcAAgACAAIAAAD3/wYAAgACAAIAAAD3/wUAAgACAAIAAAD3/wQAAgACAAIAAAD2/wkAAgACAAIAAAD2/wgAAgACAAIAAAD2/wcAAgACAAIAAAD2/wYAAgACAAIAAAD2/wUAAgACAAIAAAD2/wQAAgACAAIAAAD1/wkAAgACAAIAAAD1/wgAAgACAAIAAAD1/wcAAgACAAIAAAD1/wYAAgACAAIAAAD1/wUAAgACAAIAAAD1/wQAAgACAAIAAAD0/wkAAgABAAMAAAD0/wgAAgACAAIAAAD0/wcAAgACAAIAAAD0/wYAAgACAAIAAAD0/wUAAgACAAIAAAD0/wQAAgABAAEAAADz/wUAAgADAAIAAAD1/wMAAgACAAMAAADz/wYAAgADAAIAAADz/wcAAgADAAIAAADz/wgAAgADAAIAAAD1/woAAgACAAEAAAD2/wMAAgACAAMAAAD2/woAAgACAAEAAAD3/wMAAgACAAMAAAD3/woAAgACAAEAAAD4/wMAAgACAAMAAAD4/woAAgACAAEAAAD5/wMAAgACAAMAAAD5/woAAgACAAEAAAD6/wMAAgACAAMAAAD6/woAAgACAAEAAAD8/wUAAgABAAIAAAD8/wYAAgABAAIAAAD8/wcAAgABAAIAAAD8/wgAAgABAAIAAAA=")
-tile_set = ExtResource("1_w2k76")
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_b07tl"]
+shader = ExtResource("3_5kh0y")
+shader_parameter/speed = 2.0
+shader_parameter/strength = 1.0000000475
+shader_parameter/detail = 1.0
+
+[sub_resource type="Gradient" id="Gradient_kagyi"]
+offsets = PackedFloat32Array(0, 0.77710843)
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_ppnrb"]
+gradient = SubResource("Gradient_kagyi")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_kagyi"]
+shader = ExtResource("3_5kh0y")
+shader_parameter/speed = 2.0
+shader_parameter/strength = 2.000000095
+shader_parameter/detail = 1.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yb0f8"]
+size = Vector2(113, 103)
+
+[node name="Structure" type="StaticBody2D" unique_id=1181412728]
+
+[node name="StructureMain" type="Sprite2D" parent="." unique_id=78407814]
+position = Vector2(0, -112)
+scale = Vector2(2, 2)
+texture = ExtResource("1_gb1jp")
+
+[node name="Torch" type="Node2D" parent="StructureMain" unique_id=708561971]
+
+[node name="TorchSprite" type="Sprite2D" parent="StructureMain/Torch" unique_id=1986056611]
+position = Vector2(-47, 28)
+scale = Vector2(0.71875, 0.7195122)
+texture = ExtResource("2_5kh0y")
+
+[node name="torchLightSprite" type="Sprite2D" parent="StructureMain/Torch/TorchSprite" unique_id=1327384844]
+show_behind_parent = true
+material = SubResource("ShaderMaterial_b07tl")
+position = Vector2(-3.413045, -12.87288)
+scale = Vector2(1.0691699, 1.1949152)
+texture = ExtResource("3_b07tl")
+
+[node name="torchLightPhys" type="PointLight2D" parent="StructureMain/Torch" unique_id=27657908]
+position = Vector2(-51, 19)
+texture = SubResource("GradientTexture2D_ppnrb")
+
+[node name="Torch2" type="Node2D" parent="StructureMain" unique_id=1418792984]
+position = Vector2(37, 0)
+
+[node name="TorchSprite" type="Sprite2D" parent="StructureMain/Torch2" unique_id=1643101481]
+position = Vector2(-47, 28)
+scale = Vector2(0.71875, 0.7195122)
+texture = ExtResource("2_5kh0y")
+
+[node name="torchLightSprite" type="Sprite2D" parent="StructureMain/Torch2/TorchSprite" unique_id=141951786]
+show_behind_parent = true
+material = SubResource("ShaderMaterial_kagyi")
+position = Vector2(-3.413045, -12.87288)
+scale = Vector2(1.0691699, 1.1949152)
+texture = ExtResource("3_b07tl")
+
+[node name="torchLightPhys" type="PointLight2D" parent="StructureMain/Torch2" unique_id=1110791692]
+position = Vector2(-51, 19)
+texture = SubResource("GradientTexture2D_ppnrb")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2145759263]
+visible = false
+position = Vector2(77.5, -51.5)
+shape = SubResource("RectangleShape2D_yb0f8")
+disabled = true
