@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://dryj7u6dswu57"]
+
+[ext_resource type="Script" uid="uid://h41rh5aoss2a" path="res://Items/Weapons/Scripts/WeaponStats.gd" id="1_jv1dq"]
+[ext_resource type="Script" uid="uid://cw7xsoojx7cbr" path="res://Items/Weapons/Scripts/WeaponsGlobal.gd" id="2_1w1v3"]
+
+[sub_resource type="Resource" id="Resource_1w1v3"]
+script = ExtResource("1_jv1dq")
+attack_duration = 0.2
+metadata/_custom_type_script = "uid://h41rh5aoss2a"
+
+[resource]
+script = ExtResource("2_1w1v3")
+Weapons = Dictionary[String, ExtResource("1_jv1dq")]({
+"BareFist": SubResource("Resource_1w1v3")
+})
+metadata/_custom_type_script = "uid://cw7xsoojx7cbr"

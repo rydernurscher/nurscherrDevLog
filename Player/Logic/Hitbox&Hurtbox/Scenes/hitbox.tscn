@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://ckqytpmdkih6x" path="res://Player/Logic/Hitbox&Hurtbox/Scripts/hitbox.gd" id="1_orx6n"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_orx6n"]
+size = Vector2(19, 33)
 
 [node name="Hitbox" type="Area2D" unique_id=573039050]
 collision_layer = 0
@@ -10,4 +11,5 @@ collision_mask = 0
 script = ExtResource("1_orx6n")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1337407978]
+position = Vector2(0.5, -6.5)
 shape = SubResource("RectangleShape2D_orx6n")

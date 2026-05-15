@@ -101,7 +101,7 @@ const MASK_MAP = {
 	4:  Vector2i(4, 6), # Right Cap
 	8:  Vector2i(2, 6), # Left Cap
 	
-	# --- Inner Corners (The "Grace" connections) ---
+	# --- Inner Corners  ---
 	100: Vector2i(6, 4), # Inner Top-Left
 	101: Vector2i(5, 4), # Inner Top-Right
 	102: Vector2i(6, 3), # Inner Bottom-Left
@@ -129,7 +129,7 @@ const STONE_BRICK_MASK_MAP = {
 	4:  Vector2i(3, 4), # Right Cap
 	8:  Vector2i(1, 4), # Left Cap
 	
-	# --- Inner Corners (The "Grace" connections) ---
+	# --- Inner Corners ---
 	100: Vector2i(5, 2), # Inner Top-Left
 	101: Vector2i(4, 2), # Inner Top-Right
 	102: Vector2i(5, 1), # Inner Bottom-Left
@@ -173,9 +173,12 @@ func _ready():
 	
 	generate_world()
 	
+	@warning_ignore("integer_division")
 	var mid_x = map_width / 2
 	var mid_y = surface_level + int(surface_noise.get_noise_1d(mid_x) * surface_amplitude)
 	spawn_named_structure("spawnStructure", Vector2i(mid_x, mid_y), 25) # 9 tiles wide flat area
+	
+	_spawn_random_structures()
 	
 	spawn_player()
 	
@@ -236,6 +239,7 @@ func generate_world():
 		
 		# Determine Biome for this column
 		var current_biome = get_biome_at(x)
+		@warning_ignore("unused_variable")
 		var settings = BIOME_SETTINGS[current_biome]
 		
 		
@@ -295,16 +299,11 @@ func generate_world():
 	
 
 func _process(_delta):
-	if !player_node: return
-	
-	var player_chunk_id = floor(player_node.global_position.x / (chunk_width * 16))
-	
-	# Only show chunks within 2 chunks of the player
-	for id in chunks.keys():
-		var is_visible = abs(id - player_chunk_id) <= 2
-		chunks[id].visible = is_visible
-		if wall_chunks.has(id): wall_chunks[id].visible = is_visible
-		if foliage_chunks.has(id): foliage_chunks[id].visible = is_visible
+	# Manual visibility chunking removed:
+	# Godot's TileMapLayer automatically uses spatial indexing (quadrants) to 
+	# efficiently cull off-screen tiles. Setting visible = true on massive chunks 
+	# forces sudden rendering batch rebuilds, causing stuttering frame drops.
+	pass
 		
 func spawn_lamp_post(grid_pos: Vector2i):
 	
@@ -383,6 +382,7 @@ func spawn_named_structure(structure_key: String, tile_pos: Vector2i, flat_width
 	
 	if scene:
 		# 1. Bulldoze the area in the data
+		@warning_ignore("integer_division")
 		var start_x = tile_pos.x - (flat_width / 2)
 		var target_y = tile_pos.y
 		
@@ -436,6 +436,23 @@ func _can_place_on_tile(pos: Vector2i) -> bool:
 		return tile_data.get_custom_data("can_grow_foliage")
 	return false
 
+
+func _spawn_random_structures():
+	# Spawns your custom structures automatically across the world
+	for key in structures.keys():
+		if key == "spawnStructure": continue
+		
+		var data = structures[key]
+		var limit = data.get("limit", 1)
+		var chance = data.get("chance", 0.1)
+		
+		var spawned = 0
+		for x in range(10, map_width - 10, 40): # Spacing to avoid overlap
+			if spawned >= limit: break
+			if randf() <= chance:
+				var surf_y = surface_level + int(surface_noise.get_noise_1d(x) * surface_amplitude)
+				spawn_named_structure(key, Vector2i(x, surf_y))
+				spawned += 1
 
 func _is_cave(x, y, surf_y) -> bool:
 	var depth = y - surf_y
@@ -507,6 +524,7 @@ func get_or_create_foliage_chunk(x_pos: int) -> TileMapLayer:
 
 func spawn_player():
 	if !player_node: return
+	@warning_ignore("integer_division")
 	var mid_x = map_width / 2
 	var mid_y = surface_level + int(surface_noise.get_noise_1d(mid_x) * surface_amplitude)
 	player_node.global_position = base_layer.map_to_local(Vector2i(mid_x, mid_y - 5))

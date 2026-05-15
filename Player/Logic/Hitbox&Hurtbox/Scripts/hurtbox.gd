@@ -1,19 +1,17 @@
-# hurtbox.gd
+# res://Player/Logic/Hitbox&Hurtbox/Scripts/hurtbox.gd
 extends Area2D
 class_name Hurtbox
 
-# Custom signal to tell the parent node it got hit
-signal damage_taken(amount: float, knockback: float)
+signal damage_taken(amount: float, knockback: float, hitbox_pos: Vector2, poise_damage: float)
 
 @export var i_frames_active: bool = false
 
-func _on_area_entered(area: Area2D):
-	# If we are dodging, ignore the hit entirely!
+func _ready():
+	# Hurtboxes don't need to look for anything, they just need to be SEEN
+	monitoring = false
+	monitorable = true
+
+func take_hit(amount: float, knockback: float, source_pos: Vector2, p_damage: float):
 	if i_frames_active:
 		return
-		
-	# Check if the area that entered us is actually a Hitbox
-	if area is Hitbox:
-		# Emit the signal to whatever parent this hurtbox is attached to
-		damage_taken.emit(area.damage, area.knockback_force)
-		print("Hurtbox took ", area.damage, " damage!")
+	damage_taken.emit(amount, knockback, source_pos, p_damage)
