@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://cfxueluo5j5ap" path="res://Player/Logic/PlayerFrameworks/Scenes/player.tscn" id="9_jvuqk"]
 [ext_resource type="Script" uid="uid://vhlobhugde8h" path="res://Enemies/Scripts/EnemySpawner.gd" id="10_gyfyl"]
 [ext_resource type="PackedScene" uid="uid://dy4hmtnt4goq4" path="res://Enemies/Scenes/BaseEnemy.tscn" id="11_4vm2a"]
+[ext_resource type="Shader" uid="uid://fu2513jwjoo" path="res://World/Effects/Shaders/Distortion.gdshader" id="12_4vm2a"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qur2g"]
 shader = ExtResource("2_diavc")
@@ -30,41 +31,56 @@ shader_parameter/brightness = 0.9
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_gyfyl"]
 shader = ExtResource("8_qur2g")
 shader_parameter/speed = 2.50000011875
-shader_parameter/strength = 1.6000000760000002
-shader_parameter/detail = 1.0
-
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_qur2g"]
-
-[sub_resource type="Sky" id="Sky_qncns"]
-sky_material = SubResource("ProceduralSkyMaterial_qur2g")
-process_mode = 1
+shader_parameter/strength = 2.000000095
+shader_parameter/detail = 0.10000000475
 
 [sub_resource type="Environment" id="Environment_js7pq"]
-background_mode = 2
-sky = SubResource("Sky_qncns")
-ambient_light_source = 3
-reflected_light_source = 2
-tonemap_mode = 4
+background_mode = 3
+ambient_light_source = 1
+reflected_light_source = 1
+tonemap_mode = 3
 tonemap_agx_white = 5.34
 tonemap_agx_contrast = 1.37
 glow_enabled = true
-glow_levels/4 = 9.24
-glow_levels/5 = 8.37
-glow_intensity = 0.5
+glow_levels/1 = 0.88
+glow_levels/4 = 5.55
+glow_levels/5 = 5.98
+glow_levels/6 = 0.4
+glow_intensity = 1.98
+glow_strength = 1.72
 glow_mix = 0.091
-glow_bloom = 0.13
+glow_bloom = 0.39
 glow_blend_mode = 2
 glow_hdr_threshold = 0.9
+glow_hdr_luminance_cap = 19.92
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_eu7l1"]
 
 [sub_resource type="Compositor" id="Compositor_p1v5b"]
 
+[sub_resource type="Gradient" id="Gradient_4vm2a"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_yvxt5"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ubbky"]
+noise = SubResource("FastNoiseLite_yvxt5")
+color_ramp = SubResource("Gradient_4vm2a")
+seamless = true
+as_normal_map = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_yvxt5"]
+shader = ExtResource("12_4vm2a")
+shader_parameter/noise = SubResource("NoiseTexture2D_ubbky")
+shader_parameter/speed = 0.3
+shader_parameter/size = 0.08
+
 [node name="WorldGenerator" type="Node2D" unique_id=288371783 node_paths=PackedStringArray("player_node")]
 script = ExtResource("1_qncns")
-map_width = 2200
-surface_amplitude = 6
-surface_frequency = 0.008
+map_width = 400
+map_height = 200
+surface_amplitude = 10
+surface_frequency = 0.01
+foliage_rate = 1.0
 player_node = NodePath("Player/Player")
 background_music = ExtResource("2_qur2g")
 
@@ -142,6 +158,14 @@ compositor = SubResource("Compositor_p1v5b")
 script = ExtResource("10_gyfyl")
 enemy_scene = ExtResource("11_4vm2a")
 player = NodePath("../Player/Player")
-max_enemies = 6
+max_enemies = 2
+spawn_interval = 20.0
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=549215844]
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=1948515341]
+material = SubResource("ShaderMaterial_yvxt5")
+offset_right = 40.0
+offset_bottom = 40.0
 
 [editable path="Player"]

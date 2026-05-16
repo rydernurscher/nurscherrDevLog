@@ -2,22 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dn0ttcbglyr12"
-path.s3tc="res://.godot/imported/texture_05.png-888b467a21712cbc594106138f9173b8.s3tc.ctex"
-path.etc2="res://.godot/imported/texture_05.png-888b467a21712cbc594106138f9173b8.etc2.ctex"
+uid="uid://bjsnesdt1n3yy"
+path="res://.godot/imported/male_hero_template.png-0ef073bda7d62def1c0e0859f25e4b0c.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/kenney_prototype_textures/purple/texture_05.png"
-dest_files=["res://.godot/imported/texture_05.png-888b467a21712cbc594106138f9173b8.s3tc.ctex", "res://.godot/imported/texture_05.png-888b467a21712cbc594106138f9173b8.etc2.ctex"]
+source_file="res://assets/Characters/Prot/Char/male_hero_template.png"
+dest_files=["res://.godot/imported/male_hero_template.png-0ef073bda7d62def1c0e0859f25e4b0c.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -25,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
@@ -39,4 +37,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

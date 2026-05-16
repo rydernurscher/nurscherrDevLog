@@ -13,6 +13,8 @@ class_name WorldGenerator
 @export var surface_amplitude: int = 15
 @export var surface_frequency: float = 0.015
 @export var lamp_spacing: int = 25 # How many tiles between lamps
+@export var foliage_rate: float = 0.80
+@export var tree_rate: float = 0.05
 
 # Structures Dictionary
 @export var structures: Dictionary = {
@@ -279,10 +281,10 @@ func generate_world():
 			can_grow = tile_data.get_custom_data("can_grow_foliage")
 
 		if foliage_template and can_grow:
-			if randf() < 0.8:
+			if randf() < foliage_rate: 
 				var foliage_atlas_pos = FOLIAGE_MAP[(randi() % FOLIAGE_MAP.size()) + 1]
 				var source_id = 0
-				if randf() < 0.05: # 10% chance
+				if randf() < tree_rate: # 10% chance
 					source_id = 5
 					if source_id == 5:
 						foliage_atlas_pos = Vector2i(0,0)
@@ -386,13 +388,16 @@ func spawn_named_structure(structure_key: String, tile_pos: Vector2i, flat_width
 		var start_x = tile_pos.x - (flat_width / 2)
 		var target_y = tile_pos.y
 		
+		
 		for x in range(start_x, start_x + flat_width):
+			
 			# Clear air above
 			for y in range(target_y - 15, target_y):
 				world_data.erase(Vector2i(x, y))
 			# Fill solid ground below (foundation)
 			for y in range(target_y, target_y + 6):
 				world_data[Vector2i(x, y)] = true
+				
 		
 		# 2. Instantiate the building
 		var instance = scene.instantiate()

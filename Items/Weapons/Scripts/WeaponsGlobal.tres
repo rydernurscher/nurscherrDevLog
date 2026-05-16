@@ -5,7 +5,9 @@
 
 [sub_resource type="Resource" id="Resource_1w1v3"]
 script = ExtResource("1_jv1dq")
+damage = 20.0
 attack_duration = 0.2
+knockback = 350.0
 metadata/_custom_type_script = "uid://h41rh5aoss2a"
 
 [resource]

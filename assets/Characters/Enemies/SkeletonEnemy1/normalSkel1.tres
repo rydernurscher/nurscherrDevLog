@@ -1,0 +1,8 @@
+[gd_resource type="CanvasTexture" format=3 uid="uid://cicnggpxgok14"]
+
+[ext_resource type="Texture2D" uid="uid://b05fn4vnd2qyw" path="res://assets/Characters/Enemies/SkeletonEnemy1/Spritesheet.png" id="1_p5e6k"]
+[ext_resource type="Texture2D" uid="uid://pkml4r5rd5f2" path="res://assets/Characters/Enemies/SkeletonEnemy1/normal.png" id="2_drxjl"]
+
+[resource]
+diffuse_texture = ExtResource("1_p5e6k")
+normal_texture = ExtResource("2_drxjl")

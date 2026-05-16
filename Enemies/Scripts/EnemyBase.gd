@@ -11,6 +11,7 @@ enum State { IDLE, PATROL, CHASE, ATTACK, HURT, DEAD }
 @export var damage: float = 15.0
 @export var knockback_dealt: float = 250.0
 @export var poise_damage_dealt: float = 15.0
+@export var jump_velocity: float = -280.0 # Standard jump force for 1-2 blocks
 
 @export_group("AI")
 @export var aggro_range: float = 200.0
@@ -27,6 +28,10 @@ var stun_timer: float = 0.0
 var target: Node2D = null
 
 @onready var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
+
+# Node References for Autojump
+@onready var wall_check: RayCast2D = $WallCheck
+@onready var ledge_check: RayCast2D = $LedgeCheck
 
 func _ready():
 	current_health = max_health
@@ -56,6 +61,11 @@ func _physics_process(delta):
 		State.CHASE: _process_chase(delta)
 		State.ATTACK: _process_attack(delta)
 		State.HURT: _process_hurt(delta)
+	
+	# Run autojump check if moving horizontally and on the floor
+	if is_on_floor() and abs(velocity.x) > 0:
+		_update_raycast_directions()
+		_check_autojump()
 			
 	move_and_slide()
 	_update_animations()
@@ -85,11 +95,10 @@ func _process_attack(delta):
 	if not $Hitbox.monitorable:
 		$Hitbox.enabled_hitbox(true)
 	
-	# Instead of await, use a state timer
-	if stun_timer <= 0: # Reusing stun_timer as a general action timer
+	if stun_timer <= 0: 
 		if has_node("Hitbox"):
 			$Hitbox.set_deferred("monitorable", true)
-		stun_timer = 0.5 # Attack duration
+		stun_timer = 0.5 
 	
 	if stun_timer > 0:
 		stun_timer -= delta
@@ -104,8 +113,23 @@ func _process_hurt(delta):
 	if stun_timer <= 0:
 		current_state = State.CHASE
 
+# --- AUTOJUMP MECHANICS ---
+
+func _update_raycast_directions():
+	# Dynamically flip raycasts depending on horizontal movement direction
+	var move_dir = sign(velocity.x)
+	if move_dir != 0:
+		wall_check.target_position.x = abs(wall_check.target_position.x) * move_dir
+		ledge_check.target_position.x = abs(ledge_check.target_position.x) * move_dir
+
+func _check_autojump():
+	# If the lower ray hits a wall, but the upper ray is clear -> jump!
+	if wall_check.is_colliding() and not ledge_check.is_colliding():
+		velocity.y = jump_velocity
+
+# --------------------------
+
 func _on_hurtbox_damage_taken(amount: float, knockback: float, hitbox_pos: Vector2, p_damage: float):
-	# If we are already hurt, ignore new damage until the stun is over
 	if current_state == State.DEAD or current_state == State.HURT: 
 		return
 	
@@ -115,10 +139,9 @@ func _on_hurtbox_damage_taken(amount: float, knockback: float, hitbox_pos: Vecto
 	
 	if current_health <= 0:
 		current_state = State.DEAD
-		$CollisionShape2D.set_deferred("disabled", true) # Stop blocking player
-		$Hitbox/CollisionShape2D.set_deferred("disabled", true) # Stop hurting player
+		$CollisionShape2D.set_deferred("disabled", true) 
+		$Hitbox/CollisionShape2D.set_deferred("disabled", true) 
 	
-		# Fake a death animation with a timer for now:
 		var t = create_tween()
 		t.tween_property(self, "modulate:a", 0.0, 0.5)
 		t.tween_callback(queue_free)
@@ -127,27 +150,31 @@ func _on_hurtbox_damage_taken(amount: float, knockback: float, hitbox_pos: Vecto
 	if current_poise <= 0:
 		current_poise = max_poise 
 		current_state = State.HURT
-		stun_timer = 0.8 # Now this timer will actually reach 0
+		stun_timer = 0.8 
 		
-		# Knockback
 		var dir = sign(global_position.x - hitbox_pos.x)
 		if dir == 0: dir = 1
 		velocity.x = dir * knockback
 		velocity.y = -150.0 
 		
-		# Visual flash
 		modulate = Color(5,0,0)
 		var t = create_tween()
 		t.tween_property(self, "modulate", Color.WHITE, 0.4)
 	
-	# Reset invincibility after a short delay
 	await get_tree().create_timer(0.05).timeout
 	is_invincible = false
 
 func _update_animations():
-	if has_node("Sprite2D") and velocity.x != 0:
+	if has_node("EnemySprite") and velocity.x != 0:
 		var is_left = velocity.x < 0
-		$Sprite2D.flip_h = is_left
-		# ADD THIS: Move the enemy hitbox too
+		# Fixed a minor bug here: changed $Sprite2D to $EnemySprite based on your script context
+		$EnemySprite.flip_h = is_left
 		if has_node("Hitbox"):
 			$Hitbox.position.x = -21 if is_left else 21
+			
+	# Fixing the animation state conditions (swapped raw enum queries to true conditions)
+	if has_node("EnemySprite"):
+		match current_state:
+			State.IDLE: $EnemySprite.play("idle")
+			State.CHASE, State.PATROL: $EnemySprite.play("walk")
+			State.ATTACK: $EnemySprite.play("attack")

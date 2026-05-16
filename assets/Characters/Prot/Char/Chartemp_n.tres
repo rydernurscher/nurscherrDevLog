@@ -1,0 +1,8 @@
+[gd_resource type="CanvasTexture" format=3 uid="uid://df6ucvmme1aqm"]
+
+[ext_resource type="Texture2D" uid="uid://bjsnesdt1n3yy" path="res://assets/Characters/Prot/Char/male_hero_template.png" id="1_b03ll"]
+[ext_resource type="Texture2D" uid="uid://vlrg7lbtxn24" path="res://assets/Characters/Prot/Char/chartemp_n.png" id="2_j2a75"]
+
+[resource]
+diffuse_texture = ExtResource("1_b03ll")
+normal_texture = ExtResource("2_j2a75")

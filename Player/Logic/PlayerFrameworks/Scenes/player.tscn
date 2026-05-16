@@ -1,99 +1,231 @@
 [gd_scene format=3 uid="uid://cfxueluo5j5ap"]
 
 [ext_resource type="Script" uid="uid://bn3lg0wnyssq" path="res://Player/Logic/PlayerFrameworks/Scripts/player.gd" id="1_4flbx"]
-[ext_resource type="Shader" uid="uid://g0qiswhw5p0r" path="res://resources/postProcessing/Universal.gdshader" id="1_eikxu"]
-[ext_resource type="Texture2D" uid="uid://ba8wkt1jll1px" path="res://assets/Environment/templateforchar.png" id="2_sweqy"]
 [ext_resource type="Resource" uid="uid://dryj7u6dswu57" path="res://Items/Weapons/Scripts/WeaponsGlobal.tres" id="3_m8qxq"]
+[ext_resource type="Texture2D" uid="uid://df6ucvmme1aqm" path="res://assets/Characters/Prot/Char/Chartemp_n.tres" id="3_w1ybu"]
 [ext_resource type="Texture2D" uid="uid://bj7mcc58qqram" path="res://assets/Items/Equipment/Raven_Wing-Sheet.png" id="5_sweqy"]
 [ext_resource type="PackedScene" uid="uid://dbyi8qtw5fore" path="res://Player/playerUI/Scenes/player_ui.tscn" id="7_1jxqw"]
-[ext_resource type="Texture2D" uid="uid://qdpicbp2gs15" path="res://assets/Characters/Wisp/Wisp.png" id="9_71i5c"]
 [ext_resource type="PackedScene" uid="uid://c47h02if75tc1" path="res://Player/Logic/Hitbox&Hurtbox/Scenes/hurtbox.tscn" id="17_op7ga"]
 [ext_resource type="PackedScene" uid="uid://d3ckod8xqvbwq" path="res://Player/Logic/Hitbox&Hurtbox/Scenes/hitbox.tscn" id="18_q13i1"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_w1ybu"]
-shader = ExtResource("1_eikxu")
-shader_parameter/normal_strength = 1.0
-shader_parameter/specular_color = Color(1, 0.9, 0.7, 1)
-shader_parameter/glossiness = 0.5
-shader_parameter/emissive_tint = Color(1, 0.8, 0.4, 1)
-shader_parameter/emissive_intensity = 2.0
-shader_parameter/pulse_speed = 0.0
-shader_parameter/enable_rim = true
-shader_parameter/rim_color = Color(1, 1, 1, 0.5)
-shader_parameter/rim_width = 1.5
-shader_parameter/world_depth = 0.0
-shader_parameter/fog_color = Color(0.05, 0.07, 0.1, 1)
-shader_parameter/fog_max_density = 0.8
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_71i5c"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_eikxu"]
 height = 42.0
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_hqtel"]
-atlas = ExtResource("2_sweqy")
-region = Rect2(224, 0, 32, 32)
+[sub_resource type="AtlasTexture" id="AtlasTexture_m8qxq"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(0, 896, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_sweqy"]
-atlas = ExtResource("2_sweqy")
-region = Rect2(256, 0, 32, 32)
+[sub_resource type="AtlasTexture" id="AtlasTexture_71i5c"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(128, 896, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_dw050"]
-atlas = ExtResource("2_sweqy")
-region = Rect2(0, 32, 32, 32)
+[sub_resource type="AtlasTexture" id="AtlasTexture_lntlq"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(256, 896, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_2hs0m"]
-atlas = ExtResource("2_sweqy")
-region = Rect2(0, 0, 32, 32)
+[sub_resource type="AtlasTexture" id="AtlasTexture_lk0cj"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(0, 1024, 128, 128)
 
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_bwjto"]
-load_path = "res://.godot/imported/jumpframe.png-35687b9e0275e30bc23cabbdb76edf6f.ctex"
+[sub_resource type="AtlasTexture" id="AtlasTexture_pf6p1"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(128, 1024, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_u1c27"]
-atlas = SubResource("CompressedTexture2D_bwjto")
-region = Rect2(0, 0, 32, 32)
+[sub_resource type="AtlasTexture" id="AtlasTexture_0gtfr"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(256, 1024, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_1jxqw"]
-atlas = ExtResource("2_sweqy")
-region = Rect2(32, 0, 32, 32)
+[sub_resource type="AtlasTexture" id="AtlasTexture_5gcv7"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(384, 1024, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_nvl01"]
-atlas = ExtResource("2_sweqy")
-region = Rect2(64, 0, 32, 32)
+[sub_resource type="AtlasTexture" id="AtlasTexture_eikxu"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(0, 128, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_ivps1"]
-atlas = ExtResource("2_sweqy")
-region = Rect2(96, 0, 32, 32)
+[sub_resource type="AtlasTexture" id="AtlasTexture_w1ybu"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(128, 128, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_urp6f"]
-atlas = ExtResource("2_sweqy")
-region = Rect2(128, 0, 32, 32)
+[sub_resource type="AtlasTexture" id="AtlasTexture_b83af"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(256, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dex54"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(384, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lsn0r"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(512, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7phot"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(640, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wjfq7"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(768, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ga4vl"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(896, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vm1j1"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(1024, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nxbck"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(1152, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4qsl3"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(0, 512, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tu5iw"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(128, 512, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5ddun"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(256, 512, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8uu5i"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(384, 512, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mgjun"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(512, 512, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7tak7"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(640, 512, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ybnc3"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(0, 384, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n8xii"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(128, 384, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hgixg"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(256, 384, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f1fsi"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(384, 384, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7a62k"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(512, 384, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wvddx"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(640, 384, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_onj5e"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(768, 384, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_srbqi"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(896, 384, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nonyi"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(1024, 384, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m2gfu"]
+atlas = ExtResource("3_w1ybu")
+region = Rect2(1152, 384, 128, 128)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_4flbx"]
 animations = [{
 "frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_hqtel")
+"duration": 0.65,
+"texture": SubResource("AtlasTexture_m8qxq")
 }, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_sweqy")
+"duration": 0.65,
+"texture": SubResource("AtlasTexture_71i5c")
 }, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_dw050")
+"duration": 0.65,
+"texture": SubResource("AtlasTexture_lntlq")
+}, {
+"duration": 0.65,
+"texture": SubResource("AtlasTexture_lk0cj")
+}, {
+"duration": 0.65,
+"texture": SubResource("AtlasTexture_pf6p1")
+}, {
+"duration": 0.65,
+"texture": SubResource("AtlasTexture_0gtfr")
+}, {
+"duration": 0.65,
+"texture": SubResource("AtlasTexture_5gcv7")
 }],
 "loop": true,
 "name": &"attack",
 "speed": 5.0
 }, {
 "frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_2hs0m")
+"duration": 0.52,
+"texture": SubResource("AtlasTexture_eikxu")
+}, {
+"duration": 0.52,
+"texture": SubResource("AtlasTexture_w1ybu")
+}, {
+"duration": 0.52,
+"texture": SubResource("AtlasTexture_b83af")
+}, {
+"duration": 0.52,
+"texture": SubResource("AtlasTexture_dex54")
+}, {
+"duration": 0.52,
+"texture": SubResource("AtlasTexture_lsn0r")
+}, {
+"duration": 0.52,
+"texture": SubResource("AtlasTexture_7phot")
+}, {
+"duration": 0.52,
+"texture": SubResource("AtlasTexture_wjfq7")
+}, {
+"duration": 0.52,
+"texture": SubResource("AtlasTexture_ga4vl")
+}, {
+"duration": 0.52,
+"texture": SubResource("AtlasTexture_vm1j1")
+}, {
+"duration": 0.52,
+"texture": SubResource("AtlasTexture_nxbck")
 }],
 "loop": true,
 "name": &"idle",
 "speed": 5.0
 }, {
 "frames": [{
-"duration": 2.0,
-"texture": SubResource("AtlasTexture_u1c27")
+"duration": 0.56,
+"texture": SubResource("AtlasTexture_4qsl3")
+}, {
+"duration": 0.56,
+"texture": SubResource("AtlasTexture_tu5iw")
+}, {
+"duration": 0.56,
+"texture": SubResource("AtlasTexture_5ddun")
+}, {
+"duration": 0.56,
+"texture": SubResource("AtlasTexture_8uu5i")
+}, {
+"duration": 0.56,
+"texture": SubResource("AtlasTexture_mgjun")
+}, {
+"duration": 0.56,
+"texture": SubResource("AtlasTexture_7tak7")
 }],
 "loop": true,
 "name": &"jump",
@@ -105,17 +237,35 @@ animations = [{
 "speed": 5.0
 }, {
 "frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_1jxqw")
+"duration": 0.35,
+"texture": SubResource("AtlasTexture_ybnc3")
 }, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_nvl01")
+"duration": 0.35,
+"texture": SubResource("AtlasTexture_n8xii")
 }, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_ivps1")
+"duration": 0.35,
+"texture": SubResource("AtlasTexture_hgixg")
 }, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_urp6f")
+"duration": 0.35,
+"texture": SubResource("AtlasTexture_f1fsi")
+}, {
+"duration": 0.35,
+"texture": SubResource("AtlasTexture_7a62k")
+}, {
+"duration": 0.35,
+"texture": SubResource("AtlasTexture_wvddx")
+}, {
+"duration": 0.35,
+"texture": SubResource("AtlasTexture_onj5e")
+}, {
+"duration": 0.35,
+"texture": SubResource("AtlasTexture_srbqi")
+}, {
+"duration": 0.35,
+"texture": SubResource("AtlasTexture_nonyi")
+}, {
+"duration": 0.35,
+"texture": SubResource("AtlasTexture_m2gfu")
 }],
 "loop": true,
 "name": &"run",
@@ -163,166 +313,17 @@ animations = [{
 "speed": 5.0
 }]
 
-[sub_resource type="GDScript" id="GDScript_w1ybu"]
-script/source = "# res://NPC/Wisp/Scripts/Wisp.gd
-extends Node2D
-
-@export_group(\"Follow Settings\")
-@export var target_node: Node2D
-@export var acceleration: float = 220.0    # Speed of \"catching up\"
-@export var friction: float = 2.8         # How much it drifts/overshoots
-@export var max_speed: float = 450.0      # Maximum chase velocity
-@export var orbit_radius: float = 55.0
-@export var orbit_speed: float = 1.8
-
-@export_group(\"Visual Settings\")
-@export var light_color: Color = Color(\"#4df7ff\") # Spectral Teal
-@export var glow_intensity: float = 2.8          # HDR Multiplier for Bloom bleed
-@export var base_energy: float = 0.9
-@export var flicker_intensity: float = 0.12
-@export var pulse_speed: float = 1.5
-
-var _velocity: Vector2 = Vector2.ZERO
-var _time: float = 0.0
-var _light: PointLight2D
-var _particles: GPUParticles2D
-
-func _ready() -> void:
-	# Priority setup
-	_setup_light()
-	_setup_particles()
-	
-	if not target_node:
-		# Fallback to player group
-		target_node = get_tree().get_first_node_in_group(\"Player\")
-	
-	# Set starting position to target to avoid a wild zip on spawn
-	if target_node:
-		global_position = target_node.global_position
-
-func _setup_light() -> void:
-	_light = PointLight2D.new()
-	add_child(_light)
-	
-	# Procedural radial gradient for smooth \"Bleed\"
-	var grad = Gradient.new()
-	grad.offsets = [0.0, 0.15, 0.7, 1.0]
-	grad.colors = [
-		Color.WHITE,               # Core center
-		Color(0.8, 0.8, 0.8, 1.0), # Bright inner ring
-		Color(0.1, 0.1, 0.1, 1.0), # Soft falloff
-		Color.BLACK                # Edge (0 energy)
-	]
-	grad.interpolation_mode = Gradient.GRADIENT_INTERPOLATE_CUBIC
-	
-	var tex = GradientTexture2D.new()
-	tex.gradient = grad
-	tex.fill = GradientTexture2D.FILL_RADIAL
-	tex.fill_from = Vector2(0.5, 0.5)
-	tex.fill_to = Vector2(0.5, 0.0) 
-	tex.width = 256
-	tex.height = 256
-	
-	_light.texture = tex
-	_light.texture_scale = 1.8
-	_light.color = light_color * glow_intensity # Applying HDR for Bloom
-	_light.energy = base_energy
-	_light.shadow_enabled = true
-	_light.shadow_filter = PointLight2D.SHADOW_FILTER_PCF13
-
-func _setup_particles() -> void:
-	_particles = GPUParticles2D.new()
-	add_child(_particles)
-	_particles.amount = 40
-	_particles.process_material = _create_particle_material()
-	_particles.lifetime = 1.5
-	# Trail effect: Particles stay in the world, not stuck to the wisp
-	_particles.local_coords = false 
-
-func _process(delta: float) -> void:
-	if not target_node: return
-	
-	_time += delta
-	_handle_physics_movement(delta)
-	_handle_visuals(delta)
-
-func _handle_physics_movement(delta: float) -> void:
-	# 1. Calculate the \"Ideal\" destination (Orbit + Bobbing)
-	var orbit_offset = Vector2(
-		cos(_time * orbit_speed),
-		sin(_time * orbit_speed) * 0.5 # Elliptical
-	) * orbit_radius
-	
-	# Organic vertical sway
-	orbit_offset.y += sin(_time * 2.2) * 12.0
-	
-	var target_pos = target_node.global_position + orbit_offset
-	
-	# 2. Physics Logic: Velocity-based chasing
-	var direction = global_position.direction_to(target_pos)
-	var distance = global_position.distance_to(target_pos)
-	
-	# \"Less Forgiving\" ramp: Wisp accelerates harder as it gets left behind
-	var aggression = clamp(distance / 80.0, 0.4, 2.5)
-	
-	if distance > 4.0: # Deadzone to stop micro-jitter
-		_velocity += direction * acceleration * aggression * delta
-	
-	# 3. Apply Friction/Drag
-	_velocity -= _velocity * friction * delta
-	
-	# 4. Speed Limit
-	if _velocity.length() > max_speed:
-		_velocity = _velocity.limit_length(max_speed)
-	
-	# 5. Position Update
-	global_position += _velocity * delta
-
-func _handle_visuals(_delta: float) -> void:
-	# High-frequency flicker + low-frequency pulse
-	var flicker = sin(_time * 18.0) * cos(_time * 9.0) * flicker_intensity
-	var pulse = sin(_time * pulse_speed) * 0.08
-	
-	_light.energy = base_energy + flicker + pulse
-	
-	# Subtle \"stretching\" effect based on speed
-	var stretch = (_velocity.length() / max_speed) * 0.2
-	_light.texture_scale = 1.8 + pulse + stretch
-
-func _create_particle_material() -> ParticleProcessMaterial:
-	var mat = ParticleProcessMaterial.new()
-	mat.gravity = Vector3(0, -15, 0) # Drift upwards slowly
-	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
-	mat.emission_sphere_radius = 4.0
-	mat.initial_velocity_min = 10.0
-	mat.initial_velocity_max = 20.0
-	mat.damping_min = 3.0
-	mat.damping_max = 6.0
-	mat.scale_min = 0.4
-	mat.scale_max = 1.2
-	
-	# Color fading out over life
-	var grad = Gradient.new()
-	grad.set_color(0, Color(light_color.r, light_color.g, light_color.b, 1.0))
-	grad.set_color(1, Color(light_color.r, light_color.g, light_color.b, 0.0))
-	var tex = GradientTexture1D.new()
-	tex.gradient = grad
-	mat.color_ramp = tex
-	
-	return mat
-"
-
 [node name="Player" type="Node2D" unique_id=619370920]
 
 [node name="Player" type="CharacterBody2D" parent="." unique_id=1225257479]
 z_index = 200
-material = SubResource("ShaderMaterial_w1ybu")
+material = SubResource("CanvasItemMaterial_71i5c")
 position = Vector2(577, 325)
 script = ExtResource("1_4flbx")
 equipped_weapon = ExtResource("3_m8qxq")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player" unique_id=1525290952]
-position = Vector2(1, 3)
+position = Vector2(0, -2)
 shape = SubResource("CapsuleShape2D_eikxu")
 
 [node name="Camera2D" type="Camera2D" parent="Player" unique_id=1627368415]
@@ -339,7 +340,6 @@ drag_bottom_margin = 0.05
 
 [node name="PlayerSprite" type="AnimatedSprite2D" parent="Player" unique_id=410835553]
 position = Vector2(0.99997807, 3.000004)
-scale = Vector2(1.9406247, 1.8531258)
 sprite_frames = SubResource("SpriteFrames_4flbx")
 animation = &"attack"
 
@@ -355,26 +355,9 @@ position = Vector2(1, 15)
 collision_layer = 2
 
 [node name="Hitbox" parent="Player" unique_id=573039050 instance=ExtResource("18_q13i1")]
-position = Vector2(26, 6)
-scale = Vector2(-1.5080546, 0.33274335)
+position = Vector2(33, 4)
+scale = Vector2(-2.1080546, 0.33274335)
 collision_layer = 8
 collision_mask = 4
 
 [node name="PlayerUI" parent="Player" unique_id=1396024600 instance=ExtResource("7_1jxqw")]
-
-[node name="Wisp" type="Node2D" parent="Player" unique_id=1508945080 node_paths=PackedStringArray("target_node")]
-show_behind_parent = true
-z_as_relative = false
-position = Vector2(48, -16)
-script = SubResource("GDScript_w1ybu")
-target_node = NodePath("..")
-glow_intensity = 1.0
-base_energy = 1.1
-flicker_intensity = 0.006
-pulse_speed = 0.2
-
-[node name="Sprite2D" type="Sprite2D" parent="Player/Wisp" unique_id=970728205]
-visible = false
-position = Vector2(3.8, -3.9400067)
-scale = Vector2(0.6375, 0.4081252)
-texture = ExtResource("9_71i5c")

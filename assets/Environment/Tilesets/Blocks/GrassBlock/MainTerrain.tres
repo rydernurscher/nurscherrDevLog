@@ -4,6 +4,8 @@
 [ext_resource type="Texture2D" uid="uid://dfij1ydh00jll" path="res://assets/Environment/Tilesets/Walls/DirtWall/DirtWallTileset.png" id="2_j5lwo"]
 [ext_resource type="Texture2D" uid="uid://kghlo51uv6g8" path="res://assets/Environment/Tilesets/Blocks/StoneBrickBlock/StoneBrickBlock.png" id="3_sgavg"]
 [ext_resource type="Texture2D" uid="uid://dthp4bmy4squc" path="res://assets/Environment/Tilesets/Walls/WoodWall/WoodWall.png" id="4_st37m"]
+[ext_resource type="Texture2D" uid="uid://bwymj0xbsh2e5" path="res://assets/Environment/Trees/Tree1/Tree1.png" id="5_f3hjl"]
+[ext_resource type="Texture2D" uid="uid://cwoa3xhii0umo" path="res://assets/Environment/Trees/Tree1/Tree1Normal.png" id="6_58leu"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_j5lwo"]
 texture = ExtResource("1_sjlqp")
@@ -391,12 +393,13 @@ texture = ExtResource("4_st37m")
 2:2/0/terrain_set = 0
 2:2/0/terrains_peering_bit/top_left_corner = 1
 
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_st37m"]
-load_path = "res://.godot/imported/Tree1.png-413cf5489a4f626434cd7ed2eef7444f.ctex"
+[sub_resource type="CanvasTexture" id="CanvasTexture_8084k"]
+diffuse_texture = ExtResource("5_f3hjl")
+normal_texture = ExtResource("6_58leu")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_f3hjl"]
 resource_name = "tree1"
-texture = SubResource("CompressedTexture2D_st37m")
+texture = SubResource("CanvasTexture_8084k")
 texture_region_size = Vector2i(80, 160)
 0:0/0 = 0
 0:0/0/texture_origin = Vector2i(0, 70)

@@ -267,6 +267,8 @@ func take_damage(amount: float, knockback: float = 0.0, source_pos: Vector2 = Ve
 	if current_health <= 0: die()
 
 func die():
+	
+	await get_tree().create_timer(2.0).timeout
 	generator.spawn_player()
 	current_health += 100
 
