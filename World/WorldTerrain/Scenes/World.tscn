@@ -1,30 +1,50 @@
 [gd_scene format=4 uid="uid://drv5nrbnuw8ni"]
 
 [ext_resource type="Script" uid="uid://by4yy80x4ga2p" path="res://World/WorldTerrain/Scripts/world.gd" id="1_qncns"]
-[ext_resource type="Shader" uid="uid://csncslrpxw7hy" path="res://World/Effects/Shaders/NightSky.gdshader" id="2_diavc"]
 [ext_resource type="AudioStream" uid="uid://v0g4fea1mhw3" path="res://assets/Sounds/Music/BaseMusic/Hollow_Light.mp3" id="2_qur2g"]
-[ext_resource type="Texture2D" uid="uid://bf7kdx6ygpcqi" path="res://assets/Environment/background1.png" id="5_ubbky"]
-[ext_resource type="Texture2D" uid="uid://8eqssa8uswqr" path="res://assets/Environment/background2.png" id="6_nnetf"]
+[ext_resource type="Texture2D" uid="uid://bf7kdx6ygpcqi" path="res://assets/Environment/Backgrounds/background1.png" id="5_ubbky"]
+[ext_resource type="Texture2D" uid="uid://8eqssa8uswqr" path="res://assets/Environment/Backgrounds/background2.png" id="6_nnetf"]
 [ext_resource type="TileSet" uid="uid://wn4mtjavttbh" path="res://assets/Environment/Tilesets/Blocks/GrassBlock/MainTerrain.tres" id="7_diavc"]
-[ext_resource type="Texture2D" uid="uid://dk8vkx0l6ems4" path="res://assets/Environment/background3.png" id="7_s8apy"]
+[ext_resource type="Texture2D" uid="uid://48myfl1fbkqd" path="res://assets/Environment/Backgrounds/cloud1.png" id="7_fddg8"]
+[ext_resource type="Texture2D" uid="uid://dk8vkx0l6ems4" path="res://assets/Environment/Backgrounds/background3.png" id="7_s8apy"]
+[ext_resource type="Texture2D" uid="uid://domlstmhy5jdi" path="res://assets/Environment/Backgrounds/cloud2.png" id="8_jvuqk"]
 [ext_resource type="Shader" uid="uid://cajjtty733sou" path="res://World/Effects/Shaders/FoliageSway.gdshader" id="8_qur2g"]
 [ext_resource type="PackedScene" uid="uid://cfxueluo5j5ap" path="res://Player/Logic/PlayerFrameworks/Scenes/player.tscn" id="9_jvuqk"]
+[ext_resource type="Texture2D" uid="uid://dbw1jxj58h4cc" path="res://assets/Environment/Backgrounds/cloud3.png" id="9_qepeb"]
 [ext_resource type="Script" uid="uid://vhlobhugde8h" path="res://Enemies/Scripts/EnemySpawner.gd" id="10_gyfyl"]
+[ext_resource type="Texture2D" uid="uid://sjmpspd8ikv" path="res://assets/Environment/Backgrounds/cloud4.png" id="10_hjk7w"]
 [ext_resource type="PackedScene" uid="uid://dy4hmtnt4goq4" path="res://Enemies/Scenes/BaseEnemy.tscn" id="11_4vm2a"]
-[ext_resource type="Shader" uid="uid://fu2513jwjoo" path="res://World/Effects/Shaders/Distortion.gdshader" id="12_4vm2a"]
+[ext_resource type="Texture2D" uid="uid://tjd8q003ije" path="res://assets/Environment/Backgrounds/cloud5.png" id="11_5xaql"]
+[ext_resource type="Texture2D" uid="uid://bmvkb5dpiiup4" path="res://assets/Environment/Backgrounds/cloud6.png" id="12_44x2l"]
+
+[sub_resource type="Shader" id="Shader_s8apy"]
+code = "// res://World/WorldTerrain/Shaders/NightSky.gdshader
+shader_type canvas_item;
+
+uniform vec4 night_color : source_color = vec4(0.05, 0.08, 0.18, 1.0);
+uniform float brightness : hint_range(0.0, 1.0) = 0.9;
+
+void fragment() {
+    vec4 tex = texture(TEXTURE, UV);
+    // Convert to grayscale first to remove \"daytime\" colors
+    float gray = dot(tex.rgb, vec3(0.299, 0.587, 0.114));
+    // Tint it deep blue and darken it
+    vec3 night_vision = mix(night_color.rgb, vec3(gray), 0.1);
+    COLOR = vec4(night_vision * brightness, tex.a);
+}"
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qur2g"]
-shader = ExtResource("2_diavc")
+shader = SubResource("Shader_s8apy")
 shader_parameter/night_color = Color(0.02, 0.05, 0.15, 1)
 shader_parameter/brightness = 0.650000030875
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qncns"]
-shader = ExtResource("2_diavc")
+shader = SubResource("Shader_s8apy")
 shader_parameter/night_color = Color(0.02, 0.05, 0.15, 1)
 shader_parameter/brightness = 0.730000034675
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_diavc"]
-shader = ExtResource("2_diavc")
+shader = SubResource("Shader_s8apy")
 shader_parameter/night_color = Color(0.05, 0.08, 0.18, 1)
 shader_parameter/brightness = 0.9
 
@@ -36,43 +56,32 @@ shader_parameter/detail = 0.10000000475
 
 [sub_resource type="Environment" id="Environment_js7pq"]
 background_mode = 3
-ambient_light_source = 1
 reflected_light_source = 1
-tonemap_mode = 3
+tonemap_mode = 1
+tonemap_exposure = 0.46
+tonemap_white = 11.36
 tonemap_agx_white = 5.34
-tonemap_agx_contrast = 1.37
+tonemap_agx_contrast = 1.86
 glow_enabled = true
-glow_levels/1 = 0.88
+glow_levels/1 = 16.0
 glow_levels/4 = 5.55
 glow_levels/5 = 5.98
 glow_levels/6 = 0.4
+glow_normalized = true
 glow_intensity = 1.98
-glow_strength = 1.72
+glow_strength = 1.43
 glow_mix = 0.091
-glow_bloom = 0.39
-glow_blend_mode = 2
+glow_bloom = 0.24
+glow_blend_mode = 0
 glow_hdr_threshold = 0.9
-glow_hdr_luminance_cap = 19.92
+glow_hdr_scale = 2.65
+glow_hdr_luminance_cap = 75.65
+fog_mode = 1
+fog_density = 1.0
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_eu7l1"]
 
 [sub_resource type="Compositor" id="Compositor_p1v5b"]
-
-[sub_resource type="Gradient" id="Gradient_4vm2a"]
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_yvxt5"]
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ubbky"]
-noise = SubResource("FastNoiseLite_yvxt5")
-color_ramp = SubResource("Gradient_4vm2a")
-seamless = true
-as_normal_map = true
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_yvxt5"]
-shader = ExtResource("12_4vm2a")
-shader_parameter/noise = SubResource("NoiseTexture2D_ubbky")
-shader_parameter/speed = 0.3
-shader_parameter/size = 0.08
 
 [node name="WorldGenerator" type="Node2D" unique_id=288371783 node_paths=PackedStringArray("player_node")]
 script = ExtResource("1_qncns")
@@ -85,9 +94,6 @@ player_node = NodePath("Player/Player")
 background_music = ExtResource("2_qur2g")
 
 [node name="ParallaxBackground" type="ParallaxBackground" parent="." unique_id=1221704183]
-offset = Vector2(-400, -700)
-scale = Vector2(2, 2)
-transform = Transform2D(2, 0, 0, 2, -400, -700)
 
 [node name="Far Sky" type="ParallaxLayer" parent="ParallaxBackground" unique_id=997833902]
 position = Vector2(-533, -49)
@@ -101,7 +107,7 @@ scale = Vector2(1.6421875, 1.7265625)
 texture = ExtResource("5_ubbky")
 
 [node name="Far Mountains" type="ParallaxLayer" parent="ParallaxBackground" unique_id=834525781]
-position = Vector2(-533, -49)
+position = Vector2(-533, -98)
 motion_scale = Vector2(0.01, 0)
 motion_mirroring = Vector2(1500, 0)
 
@@ -114,7 +120,7 @@ scale = Vector2(2.3992188, 1)
 texture = ExtResource("6_nnetf")
 
 [node name="Close Mountains" type="ParallaxLayer" parent="ParallaxBackground" unique_id=1300154281]
-position = Vector2(-533, -49)
+position = Vector2(-533, -98)
 motion_scale = Vector2(0.025, 0)
 motion_mirroring = Vector2(1560, 150)
 
@@ -123,6 +129,66 @@ material = SubResource("ShaderMaterial_diavc")
 position = Vector2(834.75, 304)
 scale = Vector2(2.4617188, 1)
 texture = ExtResource("7_s8apy")
+
+[node name="Cloud1" type="ParallaxLayer" parent="ParallaxBackground" unique_id=149626322]
+position = Vector2(-915, -187)
+motion_scale = Vector2(0.067, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/Cloud1" unique_id=1950142513]
+material = SubResource("ShaderMaterial_diavc")
+position = Vector2(834.75, 304)
+scale = Vector2(2.4617188, 1)
+texture = ExtResource("7_fddg8")
+
+[node name="Cloud2" type="ParallaxLayer" parent="ParallaxBackground" unique_id=334803423]
+position = Vector2(-693, -186)
+motion_scale = Vector2(0.067, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/Cloud2" unique_id=1504248861]
+material = SubResource("ShaderMaterial_diavc")
+position = Vector2(837.00006, 264)
+scale = Vector2(2.4617188, 1)
+texture = ExtResource("8_jvuqk")
+
+[node name="Cloud3" type="ParallaxLayer" parent="ParallaxBackground" unique_id=1955629434]
+position = Vector2(-915, -187)
+motion_scale = Vector2(0.067, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/Cloud3" unique_id=1947089804]
+material = SubResource("ShaderMaterial_diavc")
+position = Vector2(844, 277)
+scale = Vector2(2.4617188, 1)
+texture = ExtResource("9_qepeb")
+
+[node name="Cloud4" type="ParallaxLayer" parent="ParallaxBackground" unique_id=374137554]
+position = Vector2(-915, -187)
+motion_scale = Vector2(0.067, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/Cloud4" unique_id=291890084]
+material = SubResource("ShaderMaterial_diavc")
+position = Vector2(1290, 249)
+scale = Vector2(2.4617188, 1)
+texture = ExtResource("10_hjk7w")
+
+[node name="Cloud5" type="ParallaxLayer" parent="ParallaxBackground" unique_id=1438812440]
+position = Vector2(-915, -187)
+motion_scale = Vector2(0.067, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/Cloud5" unique_id=2098839673]
+material = SubResource("ShaderMaterial_diavc")
+position = Vector2(944.00006, 226)
+scale = Vector2(2.4617188, 1)
+texture = ExtResource("11_5xaql")
+
+[node name="Cloud6" type="ParallaxLayer" parent="ParallaxBackground" unique_id=999238329]
+position = Vector2(-915, -187)
+motion_scale = Vector2(0.067, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/Cloud6" unique_id=1241004688]
+material = SubResource("ShaderMaterial_diavc")
+position = Vector2(1184.0001, 210)
+scale = Vector2(2.4617188, 1)
+texture = ExtResource("12_44x2l")
 
 [node name="BackgroundLayer" type="TileMapLayer" parent="." unique_id=1989235220]
 z_index = 3
@@ -145,7 +211,7 @@ collision_visibility_mode = 2
 
 [node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=1594210492]
 z_index = -1000
-color = Color(0.014423589, 1.2032688e-08, 0.23656285, 0.9019608)
+color = Color(0.015686275, 0, 0.23529412, 1)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1113306821]
 environment = SubResource("Environment_js7pq")
@@ -153,19 +219,12 @@ camera_attributes = SubResource("CameraAttributesPractical_eu7l1")
 compositor = SubResource("Compositor_p1v5b")
 
 [node name="Player" parent="." unique_id=619370920 instance=ExtResource("9_jvuqk")]
+position = Vector2(-254, -149)
 
 [node name="Enemy" type="Node2D" parent="." unique_id=1392542134 node_paths=PackedStringArray("player") groups=["enemies"]]
 script = ExtResource("10_gyfyl")
 enemy_scene = ExtResource("11_4vm2a")
 player = NodePath("../Player/Player")
-max_enemies = 2
-spawn_interval = 20.0
-
-[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=549215844]
-
-[node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=1948515341]
-material = SubResource("ShaderMaterial_yvxt5")
-offset_right = 40.0
-offset_bottom = 40.0
+max_enemies = 200
 
 [editable path="Player"]

@@ -12,12 +12,15 @@ func set_max_stats(max_hp, max_fp, max_sp):
 	stamina_bar.max_value = max_sp
 
 func update_health(val):
-	health_bar.value = val
+	var tween = create_tween()
+	tween.tween_property(health_bar, "value", val, 0.2)
 	var ratio = val / health_bar.max_value
 	health_bar.material.set_shader_parameter("health_ratio", ratio)
 
 func update_mana(new_value):
-	mana_bar.value = new_value
+	var tween = create_tween()
+	tween.tween_property(mana_bar, "value", new_value, 0.2)
 
 func update_stamina(new_value):
-	stamina_bar.value = new_value
+	var tween = create_tween()
+	tween.tween_property(stamina_bar, "value", new_value, 0.1)

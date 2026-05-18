@@ -64,9 +64,11 @@ layer = 100
 script = ExtResource("1_lwipk")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1187674477]
-offset_right = 120.0
-offset_bottom = 40.0
-scale = Vector2(1.4, 1.4)
+offset_left = -6.999998
+offset_top = -5.9999995
+offset_right = 493.0
+offset_bottom = 94.0
+scale = Vector2(0.29722634, 0.31617516)
 theme_override_constants/margin_left = 50
 theme_override_constants/margin_top = 50
 

@@ -32,6 +32,9 @@ colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 0)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_ppnrb"]
 gradient = SubResource("Gradient_kagyi")
+width = 256
+height = 128
+use_hdr = true
 fill = 1
 fill_from = Vector2(0.5, 0.5)
 
@@ -41,11 +44,12 @@ size = Vector2(113, 103)
 [node name="Structure" type="StaticBody2D" unique_id=1181412728]
 
 [node name="StructureMain" type="Sprite2D" parent="." unique_id=78407814]
-position = Vector2(-4, -147)
+position = Vector2(0, -145)
 scale = Vector2(2, 2)
 texture = SubResource("CanvasTexture_kagyi")
 
 [node name="Torch" type="Node2D" parent="StructureMain" unique_id=708561971]
+position = Vector2(-8.5, 6.5)
 
 [node name="TorchSprite" type="Sprite2D" parent="StructureMain/Torch" unique_id=325000731]
 position = Vector2(-47, 28)
@@ -61,13 +65,14 @@ texture = SubResource("CanvasTexture_tq3rp")
 
 [node name="torchLightPhys" type="PointLight2D" parent="StructureMain/Torch" unique_id=1746601014]
 position = Vector2(-51, 19)
+color = Color(1, 0.99607843, 0, 1)
 energy = 2.0
 shadow_enabled = true
 shadow_filter = 1
 texture = SubResource("GradientTexture2D_ppnrb")
 
 [node name="Torch2" type="Node2D" parent="StructureMain" unique_id=1418792984]
-position = Vector2(37, 0)
+position = Vector2(28, 6)
 
 [node name="TorchSprite" type="Sprite2D" parent="StructureMain/Torch2" unique_id=1643101481]
 position = Vector2(-47, 28)
@@ -83,6 +88,32 @@ texture = SubResource("CanvasTexture_tq3rp")
 
 [node name="torchLightPhys" type="PointLight2D" parent="StructureMain/Torch2" unique_id=1110791692]
 position = Vector2(-51, 19)
+color = Color(1, 0.99607843, 0, 1)
+energy = 2.0
+shadow_enabled = true
+shadow_filter = 1
+texture = SubResource("GradientTexture2D_ppnrb")
+
+[node name="Torch3" type="Node2D" parent="StructureMain" unique_id=1782422204]
+position = Vector2(32.500008, 8)
+rotation = 3.1415927
+scale = Vector2(0.81382686, -1.0281316)
+
+[node name="TorchSprite" type="Sprite2D" parent="StructureMain/Torch3" unique_id=2109819244]
+position = Vector2(-47, 28)
+scale = Vector2(0.71875, 0.7195122)
+texture = SubResource("CanvasTexture_7qmue")
+
+[node name="torchLightSprite" type="Sprite2D" parent="StructureMain/Torch3/TorchSprite" unique_id=1868468289]
+show_behind_parent = true
+material = SubResource("ShaderMaterial_kagyi")
+position = Vector2(-3.413045, -12.87288)
+scale = Vector2(1.0691699, 1.1949152)
+texture = SubResource("CanvasTexture_tq3rp")
+
+[node name="torchLightPhys" type="PointLight2D" parent="StructureMain/Torch3" unique_id=1702984513]
+position = Vector2(-51, 19)
+color = Color(1, 0.99607843, 0, 1)
 energy = 2.0
 shadow_enabled = true
 shadow_filter = 1

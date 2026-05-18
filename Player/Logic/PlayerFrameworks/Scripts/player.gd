@@ -44,8 +44,8 @@ var attack_timer: float = 0.0
 var stun_timer: float = 0.0
 var facing_direction: int = 1
 var current_weapon_key: String = "BareFist"
-
 var damage_tween: Tween
+var is_godmode_active: bool = false
 
 
 @onready var sprite = $PlayerSprite
@@ -72,7 +72,6 @@ func _ready():
 func _setup_ui():
 	if ui:
 		ui.set_max_stats(max_health, max_mana, max_stamina)
-		# Ensure signals are connected to the UI script methods
 		if not health_changed.is_connected(ui.update_health):
 			health_changed.connect(ui.update_health)
 		if not mana_changed.is_connected(ui.update_mana):
@@ -80,7 +79,6 @@ func _setup_ui():
 		if not stamina_changed.is_connected(ui.update_stamina):
 			stamina_changed.connect(ui.update_stamina)
 		
-		# Set initial values
 		health_changed.emit(current_health)
 		mana_changed.emit(current_mana)
 		stamina_changed.emit(current_stamina)
@@ -104,13 +102,10 @@ func _physics_process(delta):
 	_update_animations()
 	_handle_mouse_flip()
 
-
-	
 # --- INPUT & MOVEMENT ---
 func _process_standard_movement(delta):
 	var dir = Input.get_axis("left", "right")
 	
-	# Horizontal
 	if dir != 0:
 		velocity.x = move_toward(velocity.x, dir * SPEED, ACCELERATION * delta)
 		facing_direction = sign(dir)
@@ -119,7 +114,6 @@ func _process_standard_movement(delta):
 		velocity.x = move_toward(velocity.x, 0, FRICTION * delta)
 		if is_on_floor(): current_state = State.IDLE
 
-	# Jump logic
 	if Input.is_action_just_pressed("jump"): jump_buffer_timer = JUMP_BUFFER
 	
 	if jump_buffer_timer > 0 and coyote_timer > 0:
@@ -132,7 +126,6 @@ func _process_standard_movement(delta):
 	else:
 		_apply_gravity(delta)
 
-	# Action Triggers
 	if Input.is_action_just_pressed("roll") and is_on_floor() and current_stamina >= 20:
 		_start_roll()
 	elif Input.is_action_just_pressed("attack") and current_stamina >= 15:
@@ -142,21 +135,26 @@ func _process_standard_movement(delta):
 		_handle_mining()
 
 func _input(event):
-	# Debug Keys
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_H:
 			take_damage(20.0, 0.0, global_position)
 		if event.keycode == KEY_M:
 			current_mana = max(0, current_mana - 15)
 			mana_changed.emit(current_mana)
+		if event.keycode == KEY_0:
+			is_godmode_active = !is_godmode_active
+			if is_godmode_active:
+				max_health = 15000
+				current_health = max_health
+			else:
+				max_health = 100
+				current_health = max_health
+			
+			ui.set_max_stats(max_health, max_mana, max_stamina)
+			health_changed.emit(current_health)
 
-
-
-
-		
 func _handle_mining():
 	if !generator: return
-	
 	
 	var m_pos = get_global_mouse_position()
 	if global_position.distance_to(m_pos) > 48.0: return
@@ -164,21 +162,14 @@ func _handle_mining():
 	if !generator.can_player_mine_at(m_pos):
 		return
 	
-	# Use the generator's base layer to find the map coordinate
 	var map_pos = generator.base_layer.local_to_map(m_pos)
 	
 	if generator.world_data.has(map_pos):
-		# 1. Erase from the logic dictionary
 		generator.world_data.erase(map_pos)
-		
-		# 2. Update a 3x3 grid centered on the mined block
-		# This ensures cardinal AND diagonal neighbors (inner corners) update correctly
 		for x in range(-1, 2):
 			for y in range(-1, 2):
 				var target_pos = map_pos + Vector2i(x, y)
 				generator.update_tile_at(target_pos)
-		
-	
 
 func _start_roll():
 	current_state = State.ROLL
@@ -186,91 +177,67 @@ func _start_roll():
 	current_stamina -= 20.0
 	stamina_changed.emit(current_stamina)
 	velocity.x = facing_direction * ROLL_SPEED
-	
-	if has_node("Hurtbox"):
-		$Hurtbox.i_frames_active = true
+	if has_node("Hurtbox"): $Hurtbox.i_frames_active = true
 
 func _process_roll(_delta):
 	if roll_timer <= 0: 
 		current_state = State.IDLE
-		if has_node("Hurtbox"):
-			$Hurtbox.i_frames_active = false
-	
+		if has_node("Hurtbox"): $Hurtbox.i_frames_active = false
 
 func _start_attack():
-	# 1. Safety check: make sure a .tres file is assigned
-	if !equipped_weapon: 
-		print("No weapon resource assigned to player!")
-		return
-	
-	# 2. Get the specific weapon data
+	if !equipped_weapon: return
 	var data = equipped_weapon.Weapons.get(current_weapon_key)
-	
-	if !data:
-		print("Weapon key not found in dictionary!")
-		return
+	if !data: return
 
-	# 3. Use the data from the Resource
 	current_state = State.ATTACK
 	attack_timer = data.attack_duration
 	current_stamina -= data.stamina_cost
 	stamina_changed.emit(current_stamina)
 	
 	if hitbox:
-		# Update stats before enabling
 		hitbox.damage = data.damage
 		hitbox.knockback_force = data.knockback
 		hitbox.poise_damage = data.poise_damage
 		hitbox.enabled_hitbox(true)
-		
-	# Tip: If your weapon has a specific sprite, you can swap it here:
-	# if data.sprite and has_node("PlayerSprite/WeaponSprite"):
-	#     $PlayerSprite/WeaponSprite.texture = data.sprite
 
 func _process_attack(delta):
 	_apply_gravity(delta)
 	velocity.x = move_toward(velocity.x, 0, FRICTION * 0.4 * delta)
 	if attack_timer <= 0: 
 		current_state = State.IDLE
-		if hitbox:
-			hitbox.enabled_hitbox(false) # TURN OFF
+		if hitbox: hitbox.enabled_hitbox(false)
 
 func _on_hurtbox_damage_taken(amount: float, knockback: float, hitbox_pos: Vector2, _poise_dmg: float):
 	take_damage(amount, knockback, hitbox_pos)
 
 func take_damage(amount: float, knockback: float = 0.0, source_pos: Vector2 = Vector2.ZERO):
-	if current_state == State.ROLL or current_health <= 0: return
+	# FIX: Added State.HURT to immunity check to prevent rapid-fire damage during hitstun
+	if current_state == State.ROLL or current_state == State.HURT or current_health <= 0: return
 	
 	current_health = clamp(current_health - amount, 0, max_health)
 	health_changed.emit(current_health)
 	
-	# Elden Ring style Knockback & Stun
 	if knockback > 0:
 		var dir = sign(global_position.x - source_pos.x)
 		if dir == 0: dir = 1
 		velocity.x = dir * knockback
-		velocity.y = -knockback * 0.4 # Small pop in the air
+		velocity.y = -knockback * 0.4
 		current_state = State.HURT
 		stun_timer = 0.4
 	
-	# 1. Kill the previous tween if it's still running
 	if damage_tween and damage_tween.is_running():
 		damage_tween.kill()
 	
-	# 2. Reset color immediately (prevents the "no flash" glitch)
 	sprite.modulate = Color(5, 0, 0)
-	
-	# 3. Create and store the new tween
 	damage_tween = create_tween()
 	damage_tween.tween_property(sprite, "modulate", Color.WHITE, 0.6)
 	
 	if current_health <= 0: die()
 
 func die():
-	
-	await get_tree().create_timer(2.0).timeout
 	generator.spawn_player()
-	current_health += 100
+	current_health += max_health
+	health_changed.emit(current_health)
 
 # --- UTILS ---
 func _update_timers(delta):
@@ -296,12 +263,8 @@ func _handle_mouse_flip():
 		var is_left = get_global_mouse_position().x < global_position.x
 		sprite.flip_h = is_left
 		if wings: wings.flip_h = is_left
-		
-		# ADD THIS: Move the hitbox position based on direction
 		if hitbox:
 			hitbox.position.x = -21 if is_left else 21
-		
-
 
 func _apply_gravity(delta):
 	var mult = 1.6 if velocity.y > 0 else 1.0

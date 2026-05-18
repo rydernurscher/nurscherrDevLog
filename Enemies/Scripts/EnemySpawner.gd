@@ -47,13 +47,14 @@ func _attempt_spawn() -> void:
 	
 	var result = space_state.intersect_ray(query)
 	
-	# 4. If we hit the ground, spawn the enemy!
+	# 4. If ground is hit, spawn enemy
 	if result:
 		var spawn_pos = result.position
 		# Offset slightly upwards so they don't spawn stuck in the floor
 		spawn_pos.y -= 15.0 
 		
 		var enemy = enemy_scene.instantiate()
+		
 		enemy.global_position = spawn_pos
 		
 		# Add the enemy to the spawner's parent (usually the World node)
